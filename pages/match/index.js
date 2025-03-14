@@ -76,5 +76,26 @@ Page({
     })
     
     return stats
+  },
+
+  // 再来一局
+  handleRestart() {
+    this.setData({
+      matches: [{
+        A1: '',
+        A2: '',
+        B1: '',
+        B2: '',
+        scoreA: 0,
+        scoreB: 0
+      }],
+      showResult: false,
+      stats: {}
+    })
+  },
+
+  // 退出
+  handleExit() {
+    wx.navigateBack()
   }
-}) 
+})

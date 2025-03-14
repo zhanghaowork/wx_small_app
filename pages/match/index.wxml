@@ -71,15 +71,21 @@
     </view>
   
     <!-- 统计结果弹窗 -->
-    <modal wx:if="{{showResult}}" title="比赛结果" confirm-text="关闭">
-      <view class="stats-container">
-        <block wx:for="{{stats}}" wx:key="key" wx:for-item="stat" wx:for-index="name">
-          <view class="stat-item">
-            <text class="name">{{name}}:</text>
-            <text>胜{{stat.wins}}局</text>
-            <text>总得{{stat.total}}分</text>
-          </view>
-        </block>
+    <modal 
+      wx:if="{{showResult}}" 
+      title="比赛结果" 
+      confirm-text="再来一局" 
+      cancel-text="退出"
+      bindconfirm="handleRestart"
+      bindcancel="handleExit">
+    <view class="stats-container">
+    <block wx:for="{{stats}}" wx:key="key" wx:for-item="stat" wx:for-index="name">
+      <view class="stat-item">
+        <text class="name">{{name}}:</text>
+        <text>胜{{stat.wins}}局</text>
+        <text>总得{{stat.total}}分</text>
       </view>
-    </modal>
+    </block>
+  </view>
+</modal>  
 </view> 

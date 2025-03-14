@@ -1,0 +1,8 @@
+<view class="container">
+  <view class="header">
+    <text class="title">喵菲糖🍬工具集</text>
+  </view>
+  <view class="content">
+    <button class="navigate-btn" bindtap="navigateToMatch">羽毛球计分</button>
+  </view>
+</view>
