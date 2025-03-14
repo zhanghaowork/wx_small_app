@@ -1,0 +1,11 @@
+{
+  "pages": [
+    "pages/match/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "比赛计分",
+    "navigationBarTextStyle": "black"
+  }
+} 

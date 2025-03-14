@@ -1,0 +1,85 @@
+<!-- pages/match/index.wxml -->
+<view class="container">
+    <!-- 比赛列表 -->
+    <scroll-view class="match-list" scroll-y>
+      <block wx:for="{{matches}}" wx:key="index">
+        <view class="match-item">
+          <view class="round">第{{index + 1}}局</view>
+          
+          <!-- A队输入 -->
+          <view class="team-input">
+            <input 
+              placeholder="A1选手" 
+              value="{{item.A1}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="A1"
+            />
+            <input 
+              placeholder="A2选手" 
+              value="{{item.A2}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="A2"
+            />
+          </view>
+  
+          <!-- 比分输入 -->
+          <view class="score-input">
+            <input 
+              type="number" 
+              value="{{item.scoreA}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="scoreA"
+            />
+            <text>VS</text>
+            <input 
+              type="number" 
+              value="{{item.scoreB}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="scoreB"
+            />
+          </view>
+  
+          <!-- B队输入 -->
+          <view class="team-input">
+            <input 
+              placeholder="B1选手" 
+              value="{{item.B1}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="B1"
+            />
+            <input 
+              placeholder="B2选手" 
+              value="{{item.B2}}" 
+              bindinput="handleInput"
+              data-index="{{index}}" 
+              data-field="B2"
+            />
+          </view>
+        </view>
+      </block>
+    </scroll-view>
+  
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="add-btn" bindtap="addNewMatch">+ 添加新对局</button>
+      <button class="end-btn" bindtap="handleEndMatch">结束比赛</button>
+    </view>
+  
+    <!-- 统计结果弹窗 -->
+    <modal wx:if="{{showResult}}" title="比赛结果" confirm-text="关闭">
+      <view class="stats-container">
+        <block wx:for="{{stats}}" wx:key="key" wx:for-item="stat" wx:for-index="name">
+          <view class="stat-item">
+            <text class="name">{{name}}:</text>
+            <text>胜{{stat.wins}}局</text>
+            <text>总得{{stat.total}}分</text>
+          </view>
+        </block>
+      </view>
+    </modal>
+</view> 

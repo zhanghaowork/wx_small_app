@@ -1,0 +1,14 @@
+# macOS 系统自动生成的文件
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 图标文件
+Icon
+
+# 资源库目录
+._*
+
+# 终端保存的文件
+.Spotlight-V100
+.Trashes

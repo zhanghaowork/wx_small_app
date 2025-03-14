@@ -1,0 +1,116 @@
+/* pages/match/index.wxss */
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.match-list {
+  height: calc(100vh - 200rpx);
+}
+
+.match-item {
+  padding: 30rpx;
+  margin-bottom: 40rpx;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.round {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.team-input {
+  display: flex;
+  gap: 20rpx;
+  margin: 20rpx 0;
+}
+
+.team-input input {
+  flex: 1;
+  padding: 20rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 8rpx;
+  background: #fff;
+}
+
+.score-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30rpx 0;
+}
+
+.score-input input {
+  width: 150rpx;
+  text-align: center;
+  border-bottom: 4rpx solid #007AFF;
+  margin: 0 20rpx;
+  padding: 10rpx;
+  background: transparent;
+}
+
+.score-input text {
+  font-size: 36rpx;
+  color: #666;
+  margin: 0 20rpx;
+}
+
+.action-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 20rpx;
+  box-shadow: 0 -2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.add-btn, .end-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.add-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.end-btn {
+  background: #007AFF;
+  color: white;
+}
+
+.stats-container {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 20rpx;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 30rpx;
+  border-bottom: 2rpx solid #eee;
+  font-size: 28rpx;
+}
+
+.stat-item .name {
+  width: 200rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.stat-item text {
+  color: #666;
+  margin-left: 20rpx;
+} 
