@@ -1,0 +1,146 @@
+<!-- index.wxml -->
+<view class="container">
+  <!-- 输入区域 -->
+  <view class="input-section">
+    <input 
+      class="name-input"
+      placeholder="输入选手名字（2-4个字）"
+      value="{{inputName}}"
+      bindinput="onNameInput"
+      placeholder-style="color: #888;"
+      maxlength="4"
+      bindconfirm="addPlayer"
+    />
+    <button 
+      class="add-btn"
+      bindtap="addPlayer"
+      hover-class="button-hover"
+      disabled="{{players.length >= 9}}"
+    >
+      {{ players.length >= 9 ? '已达上限' : '添加选手' }}
+    </button>
+  </view>
+
+  <!-- 选手列表 -->
+  <view class="players-box" wx:if="{{players.length > 0}}">
+    <view class="section-title">当前选手（{{players.length}}/9）</view>
+    <scroll-view scroll-y class="players-list">
+      <view 
+        wx:for="{{players}}" 
+        wx:key="index" 
+        class="player-item"
+      >
+        <text>{{item}}</text>
+        <text 
+          class="delete-btn" 
+          bindtap="deletePlayer" 
+          data-index="{{index}}"
+        >×</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 生成控制 -->
+  <view class="generate-box" wx:if="{{players.length >= 5}}">
+    <button 
+      class="generate-btn"
+      bindtap="generateMatches"
+      loading="{{generating}}"
+      hover-class="button-hover"
+    >
+      生成{{players.length}}人赛程
+    </button>
+    <view class="status-tip" wx:if="{{statusMessage}}">
+      <text class="icon">ⓘ</text>
+      {{statusMessage}}
+    </view>
+  </view>
+
+  <!-- 比赛列表 -->
+  <view class="matches-box" wx:if="{{matches.length > 0 && !showStats}}">
+    <view class="section-title">
+      共{{matches.length}}场比赛
+      <text class="sub-title">（点击比分可录入）</text>
+    </view>
+    
+    <scroll-view scroll-y class="matches-scroll">
+      <view class="match-list">
+        <view 
+          wx:for="{{matches}}" 
+          wx:key="number" 
+          class="match-item {{index % 2 === 0 ? 'even' : ''}}"
+        >
+          <view class="match-header">
+            <text>第{{item.number}}场</text>
+            <text class="remark">{{item.remark}}</text>
+          </view>
+          <view class="teams-box">
+            <view class="team">
+              <text class="vs-text">{{item.team1}}</text>
+              <text class="vs-vs">VS</text>
+              <text class="vs-text">{{item.team2}}</text>
+            </view>
+            <input 
+              class="score-input"
+              placeholder="录入比分"
+              value="{{item.score}}"
+              data-index="{{index}}"
+              bindinput="onScoreInput"
+              placeholder-style="color: #999;"
+              maxlength="7"
+            />
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 结束比赛按钮 -->
+    <button 
+      class="end-btn"
+      bindtap="endTournament"
+      hover-class="button-hover"
+    >
+      结束比赛并统计
+    </button>
+  </view>
+
+  <!-- 比赛统计 -->
+  <view class="stats-box" wx:if="{{showStats}}">
+    <view class="section-title">
+      比赛统计
+      <button 
+        class="back-btn"
+        bindtap="backToMatches"
+        size="mini"
+      >返回比赛</button>
+    </view>
+
+    <view class="stats-table">
+      <view class="stats-header">
+        <text>排名</text>
+        <text>选手</text>
+        <text>胜场</text>
+        <text>总得分</text>
+        <text>胜率</text>
+      </view>
+      
+      <view 
+        wx:for="{{playerStats}}" 
+        wx:key="name" 
+        class="stats-row {{index < 3 ? 'top-three' : ''}}"
+      >
+        <text class="rank">{{index + 1}}</text>
+        <text class="name">{{item.name}}</text>
+        <text class="wins">{{item.wins}}</text>
+        <text class="points">{{item.totalPoints}}</text>
+        <text class="rate">{{item.winRate}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态提示 -->
+  <view class="empty-tips" wx:if="{{players.length < 5 && !showStats}}">
+    <image src="/images/warning.png" class="tips-icon" />
+    <text>需要至少5人才能生成赛程</text>
+  </view>
+</view>

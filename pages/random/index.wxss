@@ -1,0 +1,292 @@
+/* index.wxss */
+.container {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 输入区域 */
+.input-section {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.name-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.add-btn {
+  width: 100px;
+  height: 40px;
+  line-height: 40px;
+  background: #07c160;
+  color: white;
+  border-radius: 8px;
+  font-size: 15px;
+  padding: 0;
+}
+
+.add-btn[disabled] {
+  background: #ccc;
+}
+
+/* 选手列表 */
+.players-box {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sub-title {
+  font-size: 12px;
+  color: #888;
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+.players-list {
+  max-height: 200px;
+}
+
+.player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.delete-btn {
+  color: #e74c3c;
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+}
+
+/* 生成按钮 */
+.generate-box {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.generate-btn {
+  background: #1989fa;
+  color: white;
+  width: 100%;
+  height: 44px;
+  line-height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.status-tip {
+  margin-top: 10px;
+  color: #666;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-tip .icon {
+  margin-right: 5px;
+}
+
+/* 比赛列表 */
+.matches-box {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.matches-scroll {
+  max-height: 50vh;
+}
+
+.match-list {
+  padding-bottom: 15px;
+}
+
+.match-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.match-item.even {
+  background-color: #fafafa;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.teams-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.vs-text {
+  font-size: 16px;
+  flex: 1;
+  text-align: center;
+}
+
+.vs-vs {
+  color: #999;
+  font-size: 14px;
+}
+
+.score-input {
+  margin-top: 5px;
+  text-align: center;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 6px;
+  font-size: 16px;
+}
+
+/* 结束比赛按钮 */
+.end-btn {
+  margin-top: 20px;
+  background: #e74c3c;
+  color: white;
+  width: 100%;
+  height: 44px;
+  line-height: 44px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* 比赛统计 */
+.stats-box {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.stats-table {
+  margin-top: 10px;
+}
+
+.stats-header {
+  display: flex;
+  padding: 10px 0;
+  background: #f8f8f8;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.stats-row {
+  display: flex;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 15px;
+  align-items: center;
+}
+
+.stats-row.top-three {
+  background-color: #fff9e6;
+}
+
+.stats-header text,
+.stats-row text {
+  flex: 1;
+  text-align: center;
+}
+
+.stats-row .rank {
+  color: #666;
+  font-weight: bold;
+}
+
+.stats-row.top-three .rank {
+  color: #e67e22;
+  font-size: 16px;
+}
+
+.stats-row .name {
+  text-align: left;
+  padding-left: 10px;
+  flex: 1.5;
+}
+
+.stats-row .wins {
+  color: #07c160;
+  font-weight: bold;
+}
+
+.stats-row .points {
+  color: #1989fa;
+}
+
+.stats-row .rate {
+  color: #ff976a;
+}
+
+/* 返回按钮 */
+.back-btn {
+  background: #1989fa;
+  color: white;
+  height: 28px;
+  line-height: 28px;
+  font-size: 12px;
+  padding: 0 10px;
+  border-radius: 14px;
+}
+
+/* 空状态提示 */
+.empty-tips {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+.tips-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 15px;
+}
+
+/* 通用交互样式 */
+.button-hover {
+  opacity: 0.8;
+  transform: translateY(1px);
+}

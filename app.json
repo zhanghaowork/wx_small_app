@@ -1,7 +1,8 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/match/index"
+    "pages/match/index",
+    "pages/random/index"
   ],
   "window": {
     "backgroundTextStyle": "light",
