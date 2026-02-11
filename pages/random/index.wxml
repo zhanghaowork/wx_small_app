@@ -77,18 +77,33 @@
           <view class="teams-box">
             <view class="team">
               <text class="vs-text">{{item.team1}}</text>
+            </view>
+            <view class="score-section">
+              <input 
+                class="score-input"
+                type="number"
+                placeholder="0"
+                value="{{item.score1}}"
+                data-index="{{index}}"
+                data-team="1"
+                bindinput="onScoreInput"
+                maxlength="2"
+              />
               <text class="vs-vs">VS</text>
+              <input 
+                class="score-input"
+                type="number"
+                placeholder="0"
+                value="{{item.score2}}"
+                data-index="{{index}}"
+                data-team="2"
+                bindinput="onScoreInput"
+                maxlength="2"
+              />
+            </view>
+            <view class="team">
               <text class="vs-text">{{item.team2}}</text>
             </view>
-            <input 
-              class="score-input"
-              placeholder="录入比分"
-              value="{{item.score}}"
-              data-index="{{index}}"
-              bindinput="onScoreInput"
-              placeholder-style="color: #999;"
-              maxlength="7"
-            />
           </view>
         </view>
       </view>

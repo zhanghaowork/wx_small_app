@@ -20,6 +20,7 @@
   border-radius: 8px;
   border: 1px solid #ddd;
   font-size: 16px;
+  ime-mode: active;
 }
 
 .add-btn {
@@ -146,34 +147,55 @@
 .teams-box {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 8px;
 }
 
 .team {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  font-size: 15px;
+  color: #333;
 }
 
 .vs-text {
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
   flex: 1;
   text-align: center;
 }
 
+.score-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 8px;
+  background: #f8f8f8;
+  border-radius: 6px;
+}
+
 .vs-vs {
-  color: #999;
-  font-size: 14px;
+  font-size: 16px;
+  color: #666;
+  font-weight: bold;
+  padding: 0 12px;
 }
 
 .score-input {
-  margin-top: 5px;
+  width: 60px;
+  height: 36px;
   text-align: center;
-  border: 1px solid #eee;
+  border: 1px solid #e8e8e8;
   border-radius: 6px;
-  padding: 6px;
   font-size: 16px;
+  background: #fff;
+  color: #333;
 }
 
 /* 结束比赛按钮 */

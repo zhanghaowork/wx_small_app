@@ -3,6 +3,6 @@
     <text class="title">喵菲糖🍬工具集</text>
   </view>
   <view class="content">
-    <button class="navigate-btn" bindtap="navigateToMatch">羽毛球计分</button>
+    <button class="navigate-btn" bindtap="navigateToMatch">羽毛球多人转工具</button>
   </view>
 </view>
