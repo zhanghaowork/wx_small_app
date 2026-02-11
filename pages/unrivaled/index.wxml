@@ -1,0 +1,8 @@
+<view class="page">
+  <view class="card">
+    <view class="title">无与伦比</view>
+    <view class="desc">适合娱乐局和趣味 PK</view>
+    <view class="desc">后续会支持自定义规则与积分玩法</view>
+    <button class="btn" bindtap="start">开始配置</button>
+  </view>
+</view>

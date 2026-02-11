@@ -1,0 +1,73 @@
+<view class="page">
+  <view class="section-title">超8转规则</view>
+  <view class="card rule-card">
+    <text>每人跟随机8人各搭档1次，进行双打比赛</text>
+    <text>赛程按两片场地安排：每轮2场，共 N 轮</text>
+    <text>其中 N 为总人数，合计 2N 场比赛</text>
+  </view>
+
+  <view class="section-title">参赛人员（9-50人）</view>
+  <view class="card input-card">
+    <view class="input-row">
+      <input
+        class="name-input"
+        placeholder="输入选手姓名"
+        value="{{inputName}}"
+        bindinput="onNameInput"
+        bindconfirm="addPlayer"
+      />
+      <button class="add-btn" bindtap="addPlayer">添加</button>
+    </view>
+
+    <view class="actions">
+      <button class="batch-btn" bindtap="showBatchInput">批量导入</button>
+    </view>
+
+    <view class="player-list" wx:if="{{players.length > 0}}">
+      <view class="player-item" wx:for="{{players}}" wx:key="index">
+        <text>{{index + 1}}. {{item}}</text>
+        <text class="delete" data-index="{{index}}" bindtap="removePlayer">删除</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="error" wx:if="{{errorText}}">{{errorText}}</view>
+
+  <view class="batch-panel" wx:if="{{batchInputVisible}}">
+    <view class="panel-mask" bindtap="hideBatchInput"></view>
+    <view class="panel-body">
+      <view class="panel-title">批量导入选手</view>
+      <textarea
+        class="panel-textarea"
+        placeholder="每行一个名字，或用逗号分隔"
+        value="{{batchText}}"
+        bindinput="onBatchTextInput"
+      ></textarea>
+      <view class="panel-actions">
+        <button class="panel-cancel" bindtap="hideBatchInput">取消</button>
+        <button class="panel-ok" bindtap="applyBatchInput">确认导入</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="result" wx:if="{{rounds.length > 0}}">
+    <view class="section-title">赛程结果</view>
+    <view class="card summary">
+      <text>人数：{{summary.totalPlayers}}</text>
+      <text>轮次：{{summary.totalRounds}}</text>
+      <text>总场次：{{summary.totalMatches}}</text>
+      <text>每轮：2片场地并行</text>
+    </view>
+
+    <view class="card round-card" wx:for="{{rounds}}" wx:key="round">
+      <view class="round-title">第 {{item.round}} 轮</view>
+      <view class="court-line">1号场：{{item.court1.team1[0]}} / {{item.court1.team1[1]}} VS {{item.court1.team2[0]}} / {{item.court1.team2[1]}}</view>
+      <view class="court-line">2号场：{{item.court2.team1[0]}} / {{item.court2.team1[1]}} VS {{item.court2.team2[0]}} / {{item.court2.team2[1]}}</view>
+    </view>
+  </view>
+
+  <view class="bottom-safe"></view>
+  <view class="fixed-footer">
+    <button class="generate-btn" bindtap="generateSchedule">生成超8转赛程</button>
+  </view>
+</view>

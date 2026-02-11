@@ -1,38 +1,79 @@
-/* pages/index/index.wxss */
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #f5f5f5;
+.page {
+  min-height: 100vh;
+  background: #f1f1f1;
+  padding: 24rpx 20rpx 32rpx;
+  box-sizing: border-box;
 }
 
-.header {
-  margin-bottom: 20px;
+.top-bar {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 18rpx;
 }
 
 .title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  display: block;
+  text-align: center;
+  font-size: 54rpx;
+  font-weight: 700;
+  color: #101010;
 }
 
-.content {
+.mode-card {
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 24rpx;
+  margin-bottom: 22rpx;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
 }
 
-.navigate-btn {
-  width: 200px;
-  height: 50px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 18px;
-  text-align: center;
-  line-height: 50px;
-  margin-top: 20px;
+.mode-left {
+  width: 74%;
+}
+
+.mode-title {
+  display: block;
+  font-size: 52rpx;
+  color: #111;
+  font-weight: 700;
+  margin-bottom: 14rpx;
+}
+
+.mode-line {
+  display: block;
+  font-size: 42rpx;
+  color: #353535;
+  line-height: 1.45;
+}
+
+.mode-right {
+  width: 24%;
+  display: flex;
+  justify-content: center;
+}
+
+.start-btn {
+  width: 180rpx;
+  height: 94rpx;
+  line-height: 94rpx;
+  border-radius: 47rpx;
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 700;
+  padding: 0;
+}
+
+.btn-yellow {
+  background: #f8b400;
+}
+
+.btn-blue {
+  background: #5fa4f5;
+}
+
+.btn-green {
+  background: #4bcb52;
 }

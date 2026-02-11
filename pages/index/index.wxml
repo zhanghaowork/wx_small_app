@@ -1,8 +1,16 @@
-<view class="container">
-  <view class="header">
-    <text class="title">喵菲糖🍬工具集</text>
+<view class="page">
+  <view class="top-bar">
+    <text class="title">羽毛球助手</text>
   </view>
-  <view class="content">
-    <button class="navigate-btn" bindtap="navigateToMatch">羽毛球多人转工具</button>
+
+  <view class="mode-card" wx:for="{{modeCards}}" wx:key="id">
+    <view class="mode-left">
+      <text class="mode-title">{{item.title}}</text>
+      <text class="mode-line">{{item.desc1}}</text>
+      <text class="mode-line">{{item.desc2}}</text>
+    </view>
+    <view class="mode-right">
+      <button class="start-btn {{item.buttonClass}}" data-url="{{item.url}}" bindtap="startMode">发起</button>
+    </view>
   </view>
 </view>

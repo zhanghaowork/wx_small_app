@@ -1,338 +1,392 @@
-// index.js
+const SCHEDULE_RULES = {
+  4: [{ perPlayer: 3, rounds: 3 }],
+  5: [{ perPlayer: 4, rounds: 5 }],
+  6: [
+    { perPlayer: 4, rounds: 6 },
+    { perPlayer: 6, rounds: 9 },
+    { perPlayer: 10, rounds: 15 }
+  ],
+  7: [
+    { perPlayer: 8, rounds: 14 },
+    { perPlayer: 12, rounds: 21 }
+  ],
+  8: [{ perPlayer: 7, rounds: 14 }]
+};
+
+const TEAM_REPEAT_WEIGHT = 9;
+const OPP_REPEAT_WEIGHT = 3;
+const REST_STREAK_WEIGHT = 3;
+const QUOTA_DISTANCE_WEIGHT = 3;
+
+function pairKey(a, b) {
+  return [a, b].sort().join('|');
+}
+
 Page({
   data: {
-    inputName: "",
-    players: [],
-    matches: [],
-    generating: false,
-    statusMessage: "",
-    lastGenerated: 0,
-    showStats: false,
-    playerStats: []
+    title: '',
+    matchDate: '',
+    players: [
+      { id: 1, name: '', gender: 'M' },
+      { id: 2, name: '', gender: 'M' },
+      { id: 3, name: '', gender: 'M' },
+      { id: 4, name: '', gender: 'M' }
+    ],
+    scheduleOptions: [],
+    selectedOptionIndex: 0,
+    batchInputVisible: false,
+    batchText: '',
+    schedule: [],
+    summary: {
+      teammateRepeats: 0,
+      opponentRepeats: 0,
+      rounds: 0,
+      perPlayer: 0
+    },
+    errorText: ''
   },
 
   onLoad() {
-    const saved = wx.getStorageSync('matchData');
-    if (saved) {
-      this.setData({
-        players: saved.players || [],
-        matches: saved.matches || []
-      });
-    }
+    const today = this.formatDate(new Date());
+    this.setData({ matchDate: today });
+    this.syncScheduleOptions();
   },
 
-  onNameInput(e) {
-    this.setData({ inputName: e.detail.value.trim() });
+  formatDate(date) {
+    const y = date.getFullYear();
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  },
+
+  onTitleInput(e) {
+    this.setData({ title: e.detail.value });
+  },
+
+  onDateChange(e) {
+    this.setData({ matchDate: e.detail.value });
+  },
+
+  onPlayerNameInput(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    this.setData({ [`players[${index}].name`]: e.detail.value.trim() });
+  },
+
+  toggleGender(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const current = this.data.players[index].gender;
+    this.setData({ [`players[${index}].gender`]: current === 'M' ? 'F' : 'M' });
   },
 
   addPlayer() {
-    const name = this.data.inputName;
-    if (!name) {
-      this.setData({ statusMessage: "请输入选手姓名" });
+    const { players } = this.data;
+    if (players.length >= 8) {
+      this.showError('最多支持 8 名选手');
       return;
     }
-    if (name.length < 2 || name.length > 4) {
-      this.setData({ statusMessage: "姓名需2-4个字符" });
-      return;
-    }
-    if (this.data.players.length >= 9) {
-      this.setData({ statusMessage: "最多9位选手" });
-      return;
-    }
-    if (this.data.players.includes(name)) {
-      this.setData({ statusMessage: "选手已存在" });
-      return;
-    }
-
+    const nextId = players.length ? players[players.length - 1].id + 1 : 1;
     this.setData({
-      players: [...this.data.players, name],
-      inputName: "",
-      matches: [],
-      statusMessage: `已添加选手：${name}`,
-      showStats: false
-    }, this.saveData);
+      players: [...players, { id: nextId, name: '', gender: 'M' }],
+      errorText: '',
+      schedule: []
+    }, this.syncScheduleOptions);
   },
 
-  deletePlayer(e) {
-    const index = e.currentTarget.dataset.index;
-    const newPlayers = this.data.players.filter((_, i) => i !== index);
-    const deletedName = this.data.players[index];
-    
-    this.setData({
-      players: newPlayers,
-      matches: [],
-      statusMessage: `已删除选手：${deletedName}`,
-      showStats: false
-    }, this.saveData);
-  },
-
-  onScoreInput(e) {
-    const { index } = e.currentTarget.dataset;
-    let value = e.detail.value;
-    
-    // 比分格式验证
-    if (value && !/^\d+-\d+$/.test(value)) {
-      wx.showToast({ title: '请输入正确比分格式', icon: 'none' });
+  removePlayer(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    if (this.data.players.length <= 4) {
+      this.showError('至少保留 4 名选手');
       return;
     }
 
-    this.setData({
-      [`matches[${index}].score`]: value
-    }, this.saveData);
+    const next = this.data.players.filter((_, i) => i !== index);
+    this.setData({ players: next, errorText: '', schedule: [] }, this.syncScheduleOptions);
   },
 
-  async generateMatches() {
+  showBatchInput() {
+    this.setData({ batchInputVisible: true });
+  },
+
+  hideBatchInput() {
+    this.setData({ batchInputVisible: false, batchText: '' });
+  },
+
+  onBatchTextInput(e) {
+    this.setData({ batchText: e.detail.value });
+  },
+
+  applyBatchInput() {
+    const names = (this.data.batchText || '')
+      .split(/[\n,，、;；\s]+/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+    if (names.length < 4 || names.length > 8) {
+      this.showError('批量导入后人数需在 4-8 之间');
+      return;
+    }
+
+    if (new Set(names).size !== names.length) {
+      this.showError('批量导入中包含重名，请检查');
+      return;
+    }
+
+    const players = names.map((name, idx) => ({ id: idx + 1, name, gender: 'M' }));
+    this.setData({
+      players,
+      batchInputVisible: false,
+      batchText: '',
+      errorText: '',
+      schedule: []
+    }, this.syncScheduleOptions);
+  },
+
+  syncScheduleOptions() {
     const n = this.data.players.length;
-    if (n < 5 || n > 9) {
-      this.setData({ statusMessage: "选手人数需在5-9人之间" });
-      return;
-    }
-    if (Date.now() - this.data.lastGenerated < 1000) return;
-
-    this.setData({ 
-      generating: true,
-      statusMessage: "比赛生成中...",
-      lastGenerated: Date.now(),
-      showStats: false
-    });
-
-    try {
-      const config = this.getMatchConfig(n);
-      const matches = n === 9 ? this.generate9PlayerMatches() : this.generateStandardMatches(n, config);
-      
-      this.setData({
-        matches: matches,
-        statusMessage: `成功生成${matches.length}场比赛`
-      });
-    } catch (e) {
-      console.error("生成失败:", e);
-      this.setData({ 
-        matches: [],
-        statusMessage: `生成失败：${e.message}`
-      });
-    } finally {
-      this.setData({ generating: false });
-      this.saveData();
-    }
-  },
-
-  // 9人专用生成算法
-  generate9PlayerMatches() {
-    const players = this.data.players;
-    if (players.length !== 9) throw new Error("必须正好9位选手");
-    
-    const allPairs = this.generateAllPairs(players);
-    const matches = [];
-    const usedPairs = new Set();
-
-    // 固定生成18场比赛
-    for (let i = 0; i < 18; i++) {
-      // 获取所有未使用的有效配对组合
-      const available = allPairs.filter(pair => !usedPairs.has(pair.join(',')));
-      
-      if (available.length < 2) {
-        throw new Error(`无法生成第${i+1}场比赛，可用配对不足`);
-      }
-
-      // 随机选择第一个配对
-      const pair1 = available[Math.floor(Math.random() * available.length)];
-      
-      // 寻找能与pair1配对的第二个配对
-      const pair2 = available.find(p => 
-        p !== pair1 && 
-        new Set([...pair1, ...p]).size === 4
-      );
-
-      if (!pair2) {
-        throw new Error(`无法为${pair1.join('+')}找到合适对手`);
-      }
-
-      usedPairs.add(pair1.join(','));
-      usedPairs.add(pair2.join(','));
-      
-      matches.push({
-        number: i + 1,
-        team1: pair1.join(' & '),
-        team2: pair2.join(' & '),
-        remark: `第${i+1}场`,
-        score: ""
-      });
-    }
-
-    return matches;
-  },
-
-  // 标准生成算法（5-8人）
-  generateStandardMatches(n, config) {
-    const players = this.data.players;
-    const allPairs = this.generateAllPairs(players);
-    const pairPool = allPairs.map(pair => ({
-      key: pair.join('&'),
-      players: pair,
-      used: 0,
-      maxUsage: config.repeats
+    const options = (SCHEDULE_RULES[n] || []).map((item) => ({
+      ...item,
+      text: `每人${item.perPlayer}场，共${item.rounds}场`
     }));
 
-    const matches = [];
-    let totalAttempts = 0;
-    const MAX_ATTEMPTS = 10000;
-
-    while (matches.length < config.totalMatches && totalAttempts < MAX_ATTEMPTS) {
-      // 优先选择使用次数最少的配对
-      pairPool.sort((a, b) => a.used - b.used);
-      
-      // 尝试前5个最少使用的配对
-      const candidatePairs = pairPool.slice(0, 5).filter(p => p.used < p.maxUsage);
-      
-      let found = false;
-      for (let i = 0; i < candidatePairs.length && !found; i++) {
-        const pair1 = candidatePairs[i];
-        
-        // 寻找能与pair1配对的pair2
-        const pair2 = pairPool.find(p => 
-          p !== pair1 &&
-          p.used < p.maxUsage &&
-          new Set([...pair1.players, ...p.players]).size === 4
-        );
-
-        if (pair2) {
-          pair1.used++;
-          pair2.used++;
-          matches.push(this.createMatchItem(
-            [pair1.players, pair2.players],
-            matches.length + 1
-          ));
-          found = true;
-        }
-      }
-      
-      if (!found) break;
-      totalAttempts++;
-    }
-
-    if (matches.length < config.totalMatches) {
-      throw new Error(`仅生成${matches.length}/${config.totalMatches}场比赛`);
-    }
-
-    return matches;
+    this.setData({
+      scheduleOptions: options,
+      selectedOptionIndex: 0
+    });
   },
 
-  // 结束比赛并统计
-  endTournament() {
-    if (this.data.matches.length === 0) {
-      wx.showToast({ title: '没有可统计的比赛', icon: 'none' });
+  selectRule(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    this.setData({ selectedOptionIndex: index, schedule: [] });
+  },
+
+  showError(msg) {
+    this.setData({ errorText: msg });
+    wx.showToast({ title: msg, icon: 'none' });
+  },
+
+  validatePlayers() {
+    const names = this.data.players.map((p) => p.name.trim());
+    if (names.length < 4 || names.length > 8) {
+      return '人数需在 4-8 人之间';
+    }
+
+    for (let i = 0; i < names.length; i++) {
+      if (!names[i]) return `第 ${i + 1} 名选手姓名未填写`;
+    }
+
+    if (new Set(names).size !== names.length) {
+      return '存在重名，请修改后再生成';
+    }
+
+    if (!this.data.scheduleOptions.length) {
+      return '当前人数没有可用场次规则';
+    }
+
+    return '';
+  },
+
+  generateCompetition() {
+    const error = this.validatePlayers();
+    if (error) {
+      this.showError(error);
       return;
     }
 
-    // 统计有比分的比赛场次
-    const validMatches = this.data.matches.filter(m => m.score);
-    if (validMatches.length === 0) {
-      wx.showToast({ title: '请先录入比赛比分', icon: 'none' });
+    const names = this.data.players.map((p) => p.name.trim());
+    const rule = this.data.scheduleOptions[this.data.selectedOptionIndex];
+    const result = this.createSchedule(names, rule.rounds, rule.perPlayer);
+
+    if (!result.matches.length) {
+      this.showError('本次未找到可行排阵，请重试');
       return;
     }
-
-    const stats = {};
-    this.data.players.forEach(player => {
-      stats[player] = {
-        wins: 0,
-        totalPoints: 0,
-        matches: 0
-      };
-    });
-
-    // 统计每场比赛
-    validMatches.forEach(match => {
-      const [score1, score2] = match.score.split('-').map(Number);
-      const team1Players = match.team1.split(' & ');
-      const team2Players = match.team2.split(' & ');
-
-      // 更新选手数据
-      team1Players.forEach(player => {
-        stats[player].matches++;
-        stats[player].totalPoints += score1;
-        if (score1 > score2) stats[player].wins++;
-      });
-
-      team2Players.forEach(player => {
-        stats[player].matches++;
-        stats[player].totalPoints += score2;
-        if (score2 > score1) stats[player].wins++;
-      });
-    });
-
-    // 转换为数组并排序
-    const sortedStats = Object.keys(stats).map(name => ({
-      name,
-      wins: stats[name].wins,
-      totalPoints: stats[name].totalPoints,
-      winRate: stats[name].matches > 0 
-        ? (stats[name].wins / stats[name].matches * 100).toFixed(1) 
-        : '0.0'
-    })).sort((a, b) => {
-      // 先按胜场数，再按总得分
-      if (b.wins !== a.wins) return b.wins - a.wins;
-      return b.totalPoints - a.totalPoints;
-    });
 
     this.setData({
-      showStats: true,
-      playerStats: sortedStats,
-      statusMessage: `已统计${validMatches.length}场有效比赛`
+      schedule: result.matches,
+      summary: {
+        teammateRepeats: result.teammateRepeats,
+        opponentRepeats: result.opponentRepeats,
+        rounds: rule.rounds,
+        perPlayer: rule.perPlayer
+      },
+      errorText: ''
     });
+
+    wx.showToast({ title: '已生成比赛', icon: 'success' });
   },
 
-  // 返回比赛界面
-  backToMatches() {
-    this.setData({ showStats: false });
-  },
+  createSchedule(players, rounds, perPlayer) {
+    const allCandidates = this.buildCandidates(players);
+    if (!allCandidates.length) {
+      return { matches: [], teammateRepeats: 0, opponentRepeats: 0 };
+    }
 
-  // 辅助方法
-  getMatchConfig(n) {
-    return {
-      5: { totalMatches: 15, repeats: 3 },
-      6: { totalMatches: 15, repeats: 2 },
-      7: { totalMatches: 21, repeats: 2 },
-      8: { totalMatches: 14, repeats: 1 },
-      9: { totalMatches: 18, repeats: 1 }
-    }[n];
-  },
+    let best = null;
+    const tries = 280;
 
-  generateAllPairs(players) {
-    const pairs = [];
-    for (let i = 0; i < players.length; i++) {
-      for (let j = i + 1; j < players.length; j++) {
-        pairs.push([players[i], players[j]]);
+    for (let i = 0; i < tries; i++) {
+      const attempt = this.runGreedy(players, rounds, perPlayer, allCandidates);
+      if (!attempt) continue;
+      if (!best || attempt.totalPenalty < best.totalPenalty) {
+        best = attempt;
       }
     }
-    return pairs;
-  },
 
-  createMatchItem([pair1, pair2], number) {
+    if (!best) return { matches: [], teammateRepeats: 0, opponentRepeats: 0 };
+
     return {
-      number,
-      team1: pair1.join(' & '),
-      team2: pair2.join(' & '),
-      remark: `第${number}场`,
-      score: ""
+      matches: best.matches,
+      teammateRepeats: best.teammateRepeats,
+      opponentRepeats: best.opponentRepeats
     };
   },
 
-  saveData() {
-    wx.setStorageSync('matchData', {
-      players: this.data.players,
-      matches: this.data.matches
-    });
+  buildCandidates(players) {
+    const candidates = [];
+    for (let a = 0; a < players.length; a++) {
+      for (let b = a + 1; b < players.length; b++) {
+        for (let c = b + 1; c < players.length; c++) {
+          for (let d = c + 1; d < players.length; d++) {
+            const g = [players[a], players[b], players[c], players[d]];
+            candidates.push({ p1: [g[0], g[1]], p2: [g[2], g[3]], all: g });
+            candidates.push({ p1: [g[0], g[2]], p2: [g[1], g[3]], all: g });
+            candidates.push({ p1: [g[0], g[3]], p2: [g[1], g[2]], all: g });
+          }
+        }
+      }
+    }
+    return candidates;
   },
 
-  resetAll() {
-    this.setData({
-      players: [],
-      matches: [],
-      inputName: "",
-      statusMessage: "已重置所有数据",
-      showStats: false,
-      playerStats: []
+  runGreedy(players, rounds, perPlayer, allCandidates) {
+    const playCount = {};
+    const restStreak = {};
+    const teammateCount = {};
+    const opponentCount = {};
+    const target = {};
+
+    players.forEach((p) => {
+      playCount[p] = 0;
+      restStreak[p] = 0;
+      target[p] = perPlayer;
     });
-    wx.removeStorageSync('matchData');
+
+    const matches = [];
+
+    for (let round = 1; round <= rounds; round++) {
+      const remainingRounds = rounds - round;
+      const feasible = allCandidates.filter((cand) =>
+        this.isCandidateFeasible(cand, players, playCount, target, remainingRounds)
+      );
+
+      if (!feasible.length) return null;
+
+      const scored = feasible.map((cand) => ({
+        cand,
+        score: this.evaluateCandidate(cand, players, playCount, restStreak, teammateCount, opponentCount, target)
+      }));
+
+      scored.sort((a, b) => a.score - b.score);
+      const pool = scored.slice(0, Math.min(10, scored.length));
+      const pick = pool[Math.floor(Math.random() * pool.length)].cand;
+
+      const [t1a, t1b] = pick.p1;
+      const [t2a, t2b] = pick.p2;
+
+      this.addCount(teammateCount, pairKey(t1a, t1b));
+      this.addCount(teammateCount, pairKey(t2a, t2b));
+
+      this.addCount(opponentCount, pairKey(t1a, t2a));
+      this.addCount(opponentCount, pairKey(t1a, t2b));
+      this.addCount(opponentCount, pairKey(t1b, t2a));
+      this.addCount(opponentCount, pairKey(t1b, t2b));
+
+      pick.all.forEach((p) => {
+        playCount[p] += 1;
+        restStreak[p] = 0;
+      });
+
+      players.forEach((p) => {
+        if (!pick.all.includes(p)) restStreak[p] += 1;
+      });
+
+      matches.push({
+        round,
+        team1: [t1a, t1b],
+        team2: [t2a, t2b],
+        rests: players.filter((p) => !pick.all.includes(p))
+      });
+    }
+
+    const exact = players.every((p) => playCount[p] === target[p]);
+    if (!exact) return null;
+
+    const teammateRepeats = this.countRepeats(teammateCount);
+    const opponentRepeats = this.countRepeats(opponentCount);
+    const totalPenalty = teammateRepeats * 14 + opponentRepeats * 4;
+
+    return { matches, teammateRepeats, opponentRepeats, totalPenalty };
+  },
+
+  isCandidateFeasible(cand, players, playCount, target, remainingRounds) {
+    for (let i = 0; i < players.length; i++) {
+      const p = players[i];
+      const add = cand.all.includes(p) ? 1 : 0;
+      const after = playCount[p] + add;
+      const needAfter = target[p] - after;
+
+      if (after > target[p]) return false;
+      if (needAfter < 0) return false;
+      if (needAfter > remainingRounds) return false;
+    }
+    return true;
+  },
+
+  evaluateCandidate(cand, players, playCount, restStreak, teammateCount, opponentCount, target) {
+    const [t1a, t1b] = cand.p1;
+    const [t2a, t2b] = cand.p2;
+
+    const teamRepeat =
+      this.readCount(teammateCount, pairKey(t1a, t1b)) +
+      this.readCount(teammateCount, pairKey(t2a, t2b));
+
+    const oppRepeat =
+      this.readCount(opponentCount, pairKey(t1a, t2a)) +
+      this.readCount(opponentCount, pairKey(t1a, t2b)) +
+      this.readCount(opponentCount, pairKey(t1b, t2a)) +
+      this.readCount(opponentCount, pairKey(t1b, t2b));
+
+    let restPenalty = 0;
+    let quotaDistance = 0;
+
+    players.forEach((p) => {
+      const playNext = playCount[p] + (cand.all.includes(p) ? 1 : 0);
+      quotaDistance += Math.abs(target[p] - playNext);
+      if (!cand.all.includes(p)) {
+        restPenalty += restStreak[p] * restStreak[p];
+      }
+    });
+
+    return (
+      teamRepeat * TEAM_REPEAT_WEIGHT +
+      oppRepeat * OPP_REPEAT_WEIGHT +
+      restPenalty * REST_STREAK_WEIGHT +
+      quotaDistance * QUOTA_DISTANCE_WEIGHT
+    );
+  },
+
+  readCount(map, key) {
+    return map[key] || 0;
+  },
+
+  addCount(map, key) {
+    map[key] = (map[key] || 0) + 1;
+  },
+
+  countRepeats(map) {
+    return Object.keys(map).reduce((sum, key) => {
+      const v = map[key];
+      return sum + (v > 1 ? v - 1 : 0);
+    }, 0);
   }
 });

@@ -1,13 +1,15 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/match/index",
-    "pages/random/index"
+    "pages/random/index",
+    "pages/over8/index",
+    "pages/unrivaled/index",
+    "pages/match/index"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "喵菲糖工具集",
+    "navigationBarTitleText": "羽毛球助手",
     "navigationBarTextStyle": "black"
   }
-} 
+}
