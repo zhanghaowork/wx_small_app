@@ -18,29 +18,36 @@ Page({
     scoreStep: 10,
     teamAInput: '',
     teamBInput: '',
+    teamAOrder: [],
+    teamBOrder: [],
     segments: [],
     swaps: [],
+    scoreMatches: [],
     summary: {
       targetScore: 50,
       teamSize: 5,
       scoreStep: 10
     },
+    resultReady: false,
+    ranking: [],
+    teamScoreSummary: { teamA: 0, teamB: 0 },
+    totalScoredMatches: 0,
     errorText: ''
   },
 
   increaseTeamSize() {
     if (this.data.teamSize >= 20) return;
-    this.setData({ teamSize: this.data.teamSize + 1, segments: [], swaps: [], errorText: '' });
+    this.setData({ teamSize: this.data.teamSize + 1, segments: [], swaps: [], scoreMatches: [], resultReady: false, ranking: [], errorText: '' });
   },
 
   decreaseTeamSize() {
     if (this.data.teamSize <= 3) return;
-    this.setData({ teamSize: this.data.teamSize - 1, segments: [], swaps: [], errorText: '' });
+    this.setData({ teamSize: this.data.teamSize - 1, segments: [], swaps: [], scoreMatches: [], resultReady: false, ranking: [], errorText: '' });
   },
 
   selectScoreStep(e) {
     const value = Number(e.currentTarget.dataset.value);
-    this.setData({ scoreStep: value, segments: [], swaps: [], errorText: '' });
+    this.setData({ scoreStep: value, segments: [], swaps: [], scoreMatches: [], resultReady: false, ranking: [], errorText: '' });
   },
 
   onTeamAInput(e) {
@@ -123,16 +130,116 @@ Page({
     }
 
     this.setData({
+      teamAOrder: orderA,
+      teamBOrder: orderB,
       segments,
       swaps,
+      scoreMatches: segments.map((seg) => ({
+        id: seg.id,
+        title: `第${seg.id}段`,
+        team1: seg.pairA,
+        team2: seg.pairB,
+        score1: '',
+        score2: ''
+      })),
       summary: {
         targetScore,
         teamSize: n,
         scoreStep: step
       },
+      resultReady: false,
+      ranking: [],
       errorText: ''
     });
 
     wx.showToast({ title: '接力表已生成', icon: 'success' });
+  },
+
+  onScoreInput(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const team = Number(e.currentTarget.dataset.team);
+    const value = `${e.detail.value || ''}`.replace(/[^\d]/g, '').slice(0, 3);
+    const key = team === 1 ? 'score1' : 'score2';
+    this.setData({
+      [`scoreMatches[${index}].${key}`]: value,
+      resultReady: false
+    });
+  },
+
+  handlePrint() {
+    wx.showToast({ title: '打印功能待接入', icon: 'none' });
+  },
+
+  handleShare() {
+    wx.showToast({ title: '转发功能待接入', icon: 'none' });
+  },
+
+  onPrimaryAction() {
+    if (!this.data.segments.length) {
+      this.generate();
+      return;
+    }
+    this.endCompetition();
+  },
+
+  endCompetition() {
+    if (!this.data.scoreMatches.length) {
+      this.showError('请先生成接力表');
+      return;
+    }
+
+    const validMatches = this.data.scoreMatches.filter((m) => m.score1 !== '' && m.score2 !== '');
+    if (!validMatches.length) {
+      this.showError('请先录入至少一段比分');
+      return;
+    }
+
+    const stats = {};
+    [...this.data.teamAOrder, ...this.data.teamBOrder].forEach((name) => {
+      stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
+    });
+
+    let teamA = 0;
+    let teamB = 0;
+
+    validMatches.forEach((m) => {
+      const s1 = Number(m.score1);
+      const s2 = Number(m.score2);
+      teamA += s1;
+      teamB += s2;
+      const team1Win = s1 > s2;
+      const team2Win = s2 > s1;
+
+      m.team1.forEach((p) => {
+        if (!stats[p]) return;
+        stats[p].matches += 1;
+        stats[p].pointsFor += s1;
+        stats[p].pointsAgainst += s2;
+        if (team1Win) stats[p].wins += 1;
+        if (team2Win) stats[p].losses += 1;
+      });
+      m.team2.forEach((p) => {
+        if (!stats[p]) return;
+        stats[p].matches += 1;
+        stats[p].pointsFor += s2;
+        stats[p].pointsAgainst += s1;
+        if (team2Win) stats[p].wins += 1;
+        if (team1Win) stats[p].losses += 1;
+      });
+    });
+
+    const ranking = Object.values(stats)
+      .map((s) => ({ ...s, diff: s.pointsFor - s.pointsAgainst, winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0 }))
+      .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
+
+    this.setData({
+      ranking,
+      teamScoreSummary: { teamA, teamB },
+      totalScoredMatches: validMatches.length,
+      resultReady: true,
+      errorText: ''
+    });
+
+    wx.showToast({ title: '结算完成', icon: 'success' });
   }
 });

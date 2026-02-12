@@ -62,10 +62,61 @@
         <view>B队：{{item.outB}} 下，{{item.inB}} 上 -> {{item.nextB[0]}} + {{item.nextB[1]}}</view>
       </view>
     </view>
+
+    <view class="score-toolbar card">
+      <text class="score-tip">点击比分可以修改</text>
+      <view class="score-actions">
+        <button class="toolbar-btn print-btn" bindtap="handlePrint">打印</button>
+        <button class="toolbar-btn share-btn" bindtap="handleShare">转发</button>
+      </view>
+    </view>
+
+    <view class="card score-card" wx:for="{{scoreMatches}}" wx:key="id">
+      <view class="seg-title">{{item.title}}</view>
+      <view class="score-line">
+        <view class="team-col">
+          <text class="player-tag">{{item.team1[0]}}</text>
+          <text class="player-tag">{{item.team1[1]}}</text>
+        </view>
+        <view class="score-center">
+          <input class="score-input" type="number" data-index="{{index}}" data-team="1" value="{{item.score1}}" bindinput="onScoreInput" />
+          <text class="vs-big">VS</text>
+          <input class="score-input" type="number" data-index="{{index}}" data-team="2" value="{{item.score2}}" bindinput="onScoreInput" />
+        </view>
+        <view class="team-col">
+          <text class="player-tag">{{item.team2[0]}}</text>
+          <text class="player-tag">{{item.team2[1]}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="settlement" wx:if="{{resultReady}}">
+    <view class="section-title">结算（已录入{{totalScoredMatches}}段）</view>
+    <view class="card summary">
+      <text>A队总分：{{teamScoreSummary.teamA}}</text>
+      <text>B队总分：{{teamScoreSummary.teamB}}</text>
+    </view>
+    <view class="card rank-card">
+      <view class="rank-header">
+        <text>名次</text>
+        <text>选手</text>
+        <text>胜场</text>
+        <text>净胜</text>
+        <text>胜率</text>
+      </view>
+      <view class="rank-row" wx:for="{{ranking}}" wx:key="name">
+        <text>{{index + 1}}</text>
+        <text>{{item.name}}</text>
+        <text>{{item.wins}}</text>
+        <text>{{item.diff}}</text>
+        <text>{{item.winRate}}%</text>
+      </view>
+    </view>
   </view>
 
   <view class="bottom-safe"></view>
   <view class="fixed-footer">
-    <button class="generate-btn" bindtap="generate">生成无与伦比接力表</button>
+    <button class="generate-btn" bindtap="onPrimaryAction">{{segments.length > 0 ? '结束比赛' : '生成无与伦比接力表'}}</button>
   </view>
 </view>

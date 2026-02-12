@@ -43,6 +43,9 @@ Page({
       rounds: 0,
       perPlayer: 0
     },
+    resultReady: false,
+    ranking: [],
+    totalScoredMatches: 0,
     errorText: ''
   },
 
@@ -88,7 +91,9 @@ Page({
     this.setData({
       players: [...players, { id: nextId, name: '', gender: 'M' }],
       errorText: '',
-      schedule: []
+      schedule: [],
+      resultReady: false,
+      ranking: []
     }, this.syncScheduleOptions);
   },
 
@@ -100,7 +105,7 @@ Page({
     }
 
     const next = this.data.players.filter((_, i) => i !== index);
-    this.setData({ players: next, errorText: '', schedule: [] }, this.syncScheduleOptions);
+    this.setData({ players: next, errorText: '', schedule: [], resultReady: false, ranking: [] }, this.syncScheduleOptions);
   },
 
   showBatchInput() {
@@ -137,7 +142,9 @@ Page({
       batchInputVisible: false,
       batchText: '',
       errorText: '',
-      schedule: []
+      schedule: [],
+      resultReady: false,
+      ranking: []
     }, this.syncScheduleOptions);
   },
 
@@ -156,7 +163,7 @@ Page({
 
   selectRule(e) {
     const index = Number(e.currentTarget.dataset.index);
-    this.setData({ selectedOptionIndex: index, schedule: [] });
+    this.setData({ selectedOptionIndex: index, schedule: [], resultReady: false, ranking: [] });
   },
 
   showError(msg) {
@@ -202,13 +209,15 @@ Page({
     }
 
     this.setData({
-      schedule: result.matches,
+      schedule: result.matches.map((m) => ({ ...m, score1: '', score2: '' })),
       summary: {
         teammateRepeats: result.teammateRepeats,
         opponentRepeats: result.opponentRepeats,
         rounds: rule.rounds,
         perPlayer: rule.perPlayer
       },
+      resultReady: false,
+      ranking: [],
       errorText: ''
     });
 
@@ -388,5 +397,95 @@ Page({
       const v = map[key];
       return sum + (v > 1 ? v - 1 : 0);
     }, 0);
+  },
+
+  onScoreInput(e) {
+    const index = Number(e.currentTarget.dataset.index);
+    const team = Number(e.currentTarget.dataset.team);
+    const raw = `${e.detail.value || ''}`.replace(/[^\d]/g, '').slice(0, 3);
+    const key = team === 1 ? 'score1' : 'score2';
+    this.setData({
+      [`schedule[${index}].${key}`]: raw,
+      resultReady: false
+    });
+  },
+
+  handlePrint() {
+    wx.showToast({ title: '打印功能待接入', icon: 'none' });
+  },
+
+  handleShare() {
+    wx.showToast({ title: '转发功能待接入', icon: 'none' });
+  },
+
+  onPrimaryAction() {
+    if (!this.data.schedule.length) {
+      this.generateCompetition();
+      return;
+    }
+    this.endCompetition();
+  },
+
+  endCompetition() {
+    if (!this.data.schedule.length) {
+      this.showError('请先生成赛程');
+      return;
+    }
+
+    const validMatches = this.data.schedule.filter((m) => m.score1 !== '' && m.score2 !== '');
+    if (!validMatches.length) {
+      this.showError('请先录入至少一场比分');
+      return;
+    }
+
+    const stats = {};
+    const names = this.data.players.map((p) => p.name.trim()).filter(Boolean);
+    names.forEach((name) => {
+      stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
+    });
+
+    validMatches.forEach((m) => {
+      const s1 = Number(m.score1);
+      const s2 = Number(m.score2);
+      const team1 = m.team1;
+      const team2 = m.team2;
+      const team1Win = s1 > s2;
+      const team2Win = s2 > s1;
+
+      team1.forEach((p) => {
+        if (!stats[p]) return;
+        stats[p].matches += 1;
+        stats[p].pointsFor += s1;
+        stats[p].pointsAgainst += s2;
+        if (team1Win) stats[p].wins += 1;
+        if (team2Win) stats[p].losses += 1;
+      });
+
+      team2.forEach((p) => {
+        if (!stats[p]) return;
+        stats[p].matches += 1;
+        stats[p].pointsFor += s2;
+        stats[p].pointsAgainst += s1;
+        if (team2Win) stats[p].wins += 1;
+        if (team1Win) stats[p].losses += 1;
+      });
+    });
+
+    const ranking = Object.values(stats)
+      .map((s) => ({
+        ...s,
+        diff: s.pointsFor - s.pointsAgainst,
+        winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0
+      }))
+      .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
+
+    this.setData({
+      ranking,
+      totalScoredMatches: validMatches.length,
+      resultReady: true,
+      errorText: ''
+    });
+
+    wx.showToast({ title: '结算完成', icon: 'success' });
   }
 });
