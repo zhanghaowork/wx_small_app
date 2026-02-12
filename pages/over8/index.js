@@ -11,8 +11,8 @@ function shuffle(arr) {
   return list;
 }
 
-function pickRandom(list, count) {
-  return shuffle(list).slice(0, count);
+function normalizePlayers(list) {
+  return (list || []).map((x) => `${x}`.trim()).filter(Boolean);
 }
 
 Page({
@@ -103,9 +103,20 @@ Page({
   },
 
   generateSchedule() {
-    const players = this.data.players;
+    const players = normalizePlayers(this.data.players);
+
     if (players.length < 9) {
       this.showError('至少 9 人才能使用超8转');
+      return;
+    }
+
+    if (players.length > 50) {
+      this.showError('最多支持 50 人');
+      return;
+    }
+
+    if (new Set(players).size !== players.length) {
+      this.showError('选手列表存在重名，请先处理');
       return;
     }
 
@@ -115,13 +126,21 @@ Page({
       return;
     }
 
-    const result = this.buildSchedule(players, 8);
+    let result = null;
+    const retryTimes = n === 9 ? 1 : 6;
+    for (let i = 0; i < retryTimes; i++) {
+      const seedPlayers = i === 0 ? players : shuffle(players);
+      result = n === 9 ? this.buildScheduleFor9(seedPlayers) : this.buildScheduleGeneral(seedPlayers, 8);
+      if (result) break;
+    }
+
     if (!result) {
       this.showError('未找到可行排阵，请重试');
       return;
     }
 
     this.setData({
+      players,
       rounds: result.rounds,
       summary: {
         totalPlayers: n,
@@ -134,8 +153,70 @@ Page({
     wx.showToast({ title: '超8转赛程已生成', icon: 'success' });
   },
 
-  buildSchedule(players, degree) {
-    for (let attempt = 0; attempt < 220; attempt++) {
+  // 9人时可直接用“含轮空”的循环配对，保证每人8次搭档和8次出场
+  buildScheduleFor9(players) {
+    const bye = '__BYE__';
+    const arr = [...players, bye];
+    const rounds = [];
+    const opponentCount = {};
+
+    for (let round = 1; round <= players.length; round++) {
+      const pairs = [];
+      for (let i = 0; i < arr.length / 2; i++) {
+        const a = arr[i];
+        const b = arr[arr.length - 1 - i];
+        if (a === bye || b === bye) continue;
+        pairs.push([a, b]);
+      }
+
+      const games = this.pickBestGamePairing(pairs, opponentCount);
+      if (!games) return null;
+
+      rounds.push({
+        round,
+        court1: { team1: games[0][0], team2: games[0][1] },
+        court2: { team1: games[1][0], team2: games[1][1] }
+      });
+
+      const fixed = arr[0];
+      const rest = arr.slice(1);
+      rest.unshift(rest.pop());
+      const next = [fixed, ...rest];
+      for (let i = 0; i < arr.length; i++) arr[i] = next[i];
+    }
+
+    return { rounds };
+  },
+
+  pickBestGamePairing(pairs, opponentCount) {
+    if (pairs.length !== 4) return null;
+
+    const patterns = [
+      [[0, 1], [2, 3]],
+      [[0, 2], [1, 3]],
+      [[0, 3], [1, 2]]
+    ];
+
+    const scored = patterns.map((pt) => {
+      const g1 = [pairs[pt[0][0]], pairs[pt[0][1]]];
+      const g2 = [pairs[pt[1][0]], pairs[pt[1][1]]];
+      const score =
+        this.getOpponentPenaltyFromTeams(g1[0], g1[1], opponentCount) +
+        this.getOpponentPenaltyFromTeams(g2[0], g2[1], opponentCount);
+      return { games: [g1, g2], score };
+    });
+
+    scored.sort((a, b) => a.score - b.score || (Math.random() < 0.5 ? -1 : 1));
+    const best = scored[0].games;
+
+    this.addOpponentCount(opponentCount, best[0][0], best[0][1]);
+    this.addOpponentCount(opponentCount, best[1][0], best[1][1]);
+
+    return best;
+  },
+
+  buildScheduleGeneral(players, degree) {
+    for (let attempt = 0; attempt < 260; attempt++) {
       const edges = this.buildRegularPartnerEdges(players, degree);
       if (!edges) continue;
 
@@ -152,7 +233,7 @@ Page({
   },
 
   buildRegularPartnerEdges(players, degree) {
-    for (let attempt = 0; attempt < 180; attempt++) {
+    for (let attempt = 0; attempt < 220; attempt++) {
       const rem = {};
       const adj = {};
 
@@ -180,7 +261,7 @@ Page({
           break;
         }
 
-        const chosen = pickRandom(candidates.slice(0, Math.min(candidates.length, need + 3)), need);
+        const chosen = shuffle(candidates.slice(0, Math.min(candidates.length, need + 4))).slice(0, need);
         chosen.forEach((u) => {
           adj[v].add(u);
           adj[u].add(v);
@@ -215,7 +296,7 @@ Page({
   },
 
   buildGames(edges) {
-    for (let attempt = 0; attempt < 200; attempt++) {
+    for (let attempt = 0; attempt < 240; attempt++) {
       const left = shuffle(edges).map((e) => ({ a: e[0], b: e[1], key: edgeKey(e[0], e[1]) }));
       const used = new Set();
       const opponentCount = {};
@@ -261,8 +342,10 @@ Page({
   },
 
   getOpponentPenalty(e1, e2, opponentCount) {
-    const p1 = [e1.a, e1.b];
-    const p2 = [e2.a, e2.b];
+    return this.getOpponentPenaltyFromTeams([e1.a, e1.b], [e2.a, e2.b], opponentCount);
+  },
+
+  getOpponentPenaltyFromTeams(p1, p2, opponentCount) {
     return (
       (opponentCount[edgeKey(p1[0], p2[0])] || 0) +
       (opponentCount[edgeKey(p1[0], p2[1])] || 0) +
@@ -285,7 +368,7 @@ Page({
   },
 
   packToTwoCourts(games, roundsCount) {
-    for (let attempt = 0; attempt < 240; attempt++) {
+    for (let attempt = 0; attempt < 300; attempt++) {
       const left = shuffle(games).map((g) => ({ ...g }));
       const rounds = [];
       let ok = true;

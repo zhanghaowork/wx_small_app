@@ -39,7 +39,7 @@
     }
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "3.0.2",
   "appid": "wx6866f072440d3fb1",
   "projectname": "喵菲糖工具集",
   "condition": {},

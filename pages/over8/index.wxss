@@ -68,7 +68,8 @@
 .player-list {
   margin-top: 12rpx;
   max-height: 460rpx;
-  overflow: hidden;
+  overflow-y: auto;
+  min-height: 80rpx;
 }
 
 .player-item {

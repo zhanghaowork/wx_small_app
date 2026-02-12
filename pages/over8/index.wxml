@@ -23,12 +23,12 @@
       <button class="batch-btn" bindtap="showBatchInput">批量导入</button>
     </view>
 
-    <view class="player-list" wx:if="{{players.length > 0}}">
+    <scroll-view class="player-list" wx:if="{{players.length > 0}}" scroll-y>
       <view class="player-item" wx:for="{{players}}" wx:key="index">
         <text>{{index + 1}}. {{item}}</text>
         <text class="delete" data-index="{{index}}" bindtap="removePlayer">删除</text>
       </view>
-    </view>
+    </scroll-view>
   </view>
 
   <view class="error" wx:if="{{errorText}}">{{errorText}}</view>

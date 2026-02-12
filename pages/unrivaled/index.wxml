@@ -1,8 +1,71 @@
 <view class="page">
-  <view class="card">
-    <view class="title">无与伦比</view>
-    <view class="desc">适合娱乐局和趣味 PK</view>
-    <view class="desc">后续会支持自定义规则与积分玩法</view>
-    <button class="btn" bindtap="start">开始配置</button>
+  <view class="section-title">无与伦比规则</view>
+  <view class="card rule-card">
+    <text>开局：1号+2号上场，从 0:0 开始</text>
+    <text>接力：到达 K、2K、3K...N*K 分时，双方同时换人</text>
+    <text>换人模式：当前组合前者下，下一位上；形成连续双人组合</text>
+  </view>
+
+  <view class="section-title">参数设置</view>
+  <view class="card config-card">
+    <view class="config-row">
+      <text class="label">每队人数 N</text>
+      <view class="stepper">
+        <button class="step-btn" bindtap="decreaseTeamSize">-</button>
+        <text class="step-value">{{teamSize}}</text>
+        <button class="step-btn" bindtap="increaseTeamSize">+</button>
+      </view>
+    </view>
+
+    <view class="config-row">
+      <text class="label">每段分值 K</text>
+      <view class="score-options">
+        <view class="option {{scoreStep === 10 ? 'active' : ''}}" data-value="10" bindtap="selectScoreStep">10分制</view>
+        <view class="option {{scoreStep === 15 ? 'active' : ''}}" data-value="15" bindtap="selectScoreStep">15分制</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-title">队伍顺序（可选）</view>
+  <view class="card input-card">
+    <text class="hint">每队请输入 {{teamSize}} 人，按 1-N 顺序。留空将用 A1..AN / B1..BN 默认编号。</text>
+
+    <text class="input-label">A队名单</text>
+    <textarea class="textarea" placeholder="示例：张三 李四 王五..." value="{{teamAInput}}" bindinput="onTeamAInput"></textarea>
+
+    <text class="input-label">B队名单</text>
+    <textarea class="textarea" placeholder="示例：赵一 钱二 孙三..." value="{{teamBInput}}" bindinput="onTeamBInput"></textarea>
+  </view>
+
+  <view class="error" wx:if="{{errorText}}">{{errorText}}</view>
+
+  <view class="result" wx:if="{{segments.length > 0}}">
+    <view class="section-title">接力排表</view>
+    <view class="card summary">
+      <text>每队人数：{{summary.teamSize}}</text>
+      <text>每段分值：{{summary.scoreStep}}</text>
+      <text>目标分值：{{summary.targetScore}}</text>
+      <text>接力段数：{{segments.length}}</text>
+    </view>
+
+    <view class="card segment-card" wx:for="{{segments}}" wx:key="id">
+      <view class="seg-title">第{{item.id}}段（{{item.from}} - {{item.to}}分）</view>
+      <view class="seg-line">A队：{{item.pairA[0]}} + {{item.pairA[1]}}</view>
+      <view class="seg-line">B队：{{item.pairB[0]}} + {{item.pairB[1]}}</view>
+    </view>
+
+    <view class="card swap-card" wx:if="{{swaps.length > 0}}">
+      <view class="swap-title">换人节点</view>
+      <view class="swap-item" wx:for="{{swaps}}" wx:key="score">
+        <view>{{item.score}}分换人</view>
+        <view>A队：{{item.outA}} 下，{{item.inA}} 上 -> {{item.nextA[0]}} + {{item.nextA[1]}}</view>
+        <view>B队：{{item.outB}} 下，{{item.inB}} 上 -> {{item.nextB[0]}} + {{item.nextB[1]}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-safe"></view>
+  <view class="fixed-footer">
+    <button class="generate-btn" bindtap="generate">生成无与伦比接力表</button>
   </view>
 </view>
