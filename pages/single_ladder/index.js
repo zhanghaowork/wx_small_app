@@ -232,6 +232,16 @@ Page({
     wx.setStorageSync(HISTORY_KEY, next);
   },
 
+  onShareAppMessage() {
+    const title = this.data.title
+      ? `单打攻擂赛：${this.data.title}`
+      : '羽毛球单打攻擂赛，欢迎来挑战';
+    return {
+      title,
+      path: '/pages/single_ladder/index'
+    };
+  },
+
   onPrimaryAction() {
     if (this.data.isEnding) return;
     this.endCompetition();

@@ -25,5 +25,12 @@ Page({
         wx.showToast({ title: '已清空', icon: 'success' });
       }
     });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '羽毛球助手：我的比赛记录',
+      path: '/pages/mine/index'
+    };
   }
 });

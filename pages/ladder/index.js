@@ -275,6 +275,16 @@ Page({
     wx.setStorageSync(HISTORY_KEY, next);
   },
 
+  onShareAppMessage() {
+    const title = this.data.title
+      ? `固搭擂台赛：${this.data.title}`
+      : '羽毛球固搭擂台赛，等你来攻擂';
+    return {
+      title,
+      path: '/pages/ladder/index'
+    };
+  },
+
   onPrimaryAction() {
     if (this.data.isEnding) return;
     this.endCompetition();

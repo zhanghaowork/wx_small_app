@@ -100,5 +100,12 @@ Page({
       return;
     }
     wx.navigateTo({ url });
+  },
+
+  onShareAppMessage() {
+    return {
+      title: '羽毛球助手：智能排赛、比分结算、战绩记录',
+      path: '/pages/index/index'
+    };
   }
 });

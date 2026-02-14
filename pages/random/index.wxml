@@ -70,7 +70,7 @@
       <text class="score-tip">点击比分可以修改</text>
       <view class="score-actions">
         <button class="toolbar-btn print-btn" bindtap="handlePrint">打印</button>
-        <button class="toolbar-btn share-btn" bindtap="handleShare">转发</button>
+        <button class="toolbar-btn share-btn" open-type="share">转发</button>
       </view>
     </view>
 

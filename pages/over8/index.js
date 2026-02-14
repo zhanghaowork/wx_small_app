@@ -489,8 +489,11 @@ Page({
     wx.showToast({ title: '打印功能待接入', icon: 'none' });
   },
 
-  handleShare() {
-    wx.showToast({ title: '转发功能待接入', icon: 'none' });
+  onShareAppMessage() {
+    return {
+      title: '羽毛球超8转，智能排阵快速开赛',
+      path: '/pages/over8/index'
+    };
   },
 
   onPrimaryAction() {

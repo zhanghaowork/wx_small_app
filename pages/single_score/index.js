@@ -109,6 +109,16 @@ Page({
     wx.setStorageSync(HISTORY_KEY, next);
   },
 
+  onShareAppMessage() {
+    const title = this.data.title
+      ? `单打积分赛：${this.data.title}`
+      : '羽毛球单打积分赛，快速记录比分并结算';
+    return {
+      title,
+      path: '/pages/single_score/index'
+    };
+  },
+
   onPrimaryAction() {
     if (this.data.isEnding) return;
     this.endCompetition();

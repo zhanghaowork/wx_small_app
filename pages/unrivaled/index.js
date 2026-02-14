@@ -200,8 +200,11 @@ Page({
     wx.showToast({ title: '打印功能待接入', icon: 'none' });
   },
 
-  handleShare() {
-    wx.showToast({ title: '转发功能待接入', icon: 'none' });
+  onShareAppMessage() {
+    return {
+      title: '羽毛球无与伦比接力赛，来一局吗？',
+      path: '/pages/unrivaled/index'
+    };
   },
 
   onPrimaryAction() {

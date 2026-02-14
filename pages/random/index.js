@@ -448,8 +448,14 @@ Page({
     wx.showToast({ title: '打印功能待接入', icon: 'none' });
   },
 
-  handleShare() {
-    wx.showToast({ title: '转发功能待接入', icon: 'none' });
+  onShareAppMessage() {
+    const title = this.data.title
+      ? `羽毛球4-8人转：${this.data.title}`
+      : '羽毛球4-8人转，快来一起组局';
+    return {
+      title,
+      path: '/pages/random/index'
+    };
   },
 
   onPrimaryAction() {
