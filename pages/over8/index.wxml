@@ -97,18 +97,23 @@
     <view class="section-title">结算排名（已录入{{totalScoredMatches}}场）</view>
     <view class="card rank-card">
       <view class="rank-header">
-        <text>名次</text>
-        <text>选手</text>
-        <text>胜场</text>
-        <text>净胜</text>
-        <text>胜率</text>
+        <text class="rank-col rank-col-rank">排名</text>
+        <text class="rank-col rank-col-name">选手</text>
+        <text class="rank-col">胜场</text>
+        <text class="rank-col">净胜</text>
+        <text class="rank-col">胜率</text>
       </view>
-      <view class="rank-row" wx:for="{{ranking}}" wx:key="name">
-        <text>{{index + 1}}</text>
-        <text>{{item.name}}</text>
-        <text>{{item.wins}}</text>
-        <text>{{item.diff}}</text>
-        <text>{{item.winRate}}%</text>
+      <view class="rank-row {{index === 0 ? 'rank-top1' : (index === 1 ? 'rank-top2' : (index === 2 ? 'rank-top3' : ''))}}" wx:for="{{ranking}}" wx:key="name">
+        <view class="rank-col rank-col-rank rank-rank-wrap">
+          <text class="medal" wx:if="{{index === 0}}">🥇</text>
+          <text class="medal" wx:if="{{index === 1}}">🥈</text>
+          <text class="medal" wx:if="{{index === 2}}">🥉</text>
+          <text class="rank-no">{{index + 1}}</text>
+        </view>
+        <text class="rank-col rank-col-name">{{item.name}}</text>
+        <text class="rank-col rank-num">{{item.wins}}</text>
+        <text class="rank-col rank-num">{{item.diff}}</text>
+        <text class="rank-col rank-num">{{item.winRate}}%</text>
       </view>
     </view>
   </view>

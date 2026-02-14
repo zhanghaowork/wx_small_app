@@ -359,27 +359,71 @@
 }
 
 .rank-card {
-  padding: 12rpx 14rpx;
+  padding: 12rpx 14rpx 6rpx;
 }
 
 .rank-header,
 .rank-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 110rpx 1fr 120rpx 120rpx 120rpx;
   align-items: center;
-  border-bottom: 2rpx solid #f0f0f0;
-  padding: 10rpx 0;
+  border-bottom: 2rpx solid #eef1f6;
+  padding: 12rpx 10rpx;
+  border-radius: 12rpx;
 }
 
-.rank-header text,
-.rank-row text {
-  flex: 1;
+.rank-col {
   text-align: center;
-  font-size: 30rpx;
+  font-size: 28rpx;
 }
 
-.rank-header text {
+.rank-col-name {
+  text-align: left;
+}
+
+.rank-header .rank-col {
   color: #7a7f86;
   font-weight: 700;
+}
+
+.rank-row {
+  margin-top: 10rpx;
+  border-bottom: 0;
+  background: #fff;
+}
+
+.rank-rank-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.medal {
+  font-size: 28rpx;
+}
+
+.rank-no {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #4a5568;
+}
+
+.rank-num {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.rank-top1 {
+  background: linear-gradient(90deg, #ffe0de 0%, #fff 75%);
+}
+
+.rank-top2 {
+  background: linear-gradient(90deg, #ffedc9 0%, #fff 75%);
+}
+
+.rank-top3 {
+  background: linear-gradient(90deg, #d9e8ff 0%, #fff 75%);
 }
 
 .bottom-safe {
@@ -406,4 +450,73 @@
   color: #fff;
   font-size: 42rpx;
   font-weight: 700;
+}
+
+/* UI Polish */
+.page {
+  background: #f4f6fb;
+}
+
+.section-title {
+  font-size: 36rpx;
+  color: #2f3a4a;
+  margin: 14rpx 6rpx;
+}
+
+.card,
+.summary {
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(30, 64, 175, 0.06);
+}
+
+.player-input,
+.value-input,
+.panel-textarea,
+.score-input {
+  background: #f8faff;
+  border-radius: 12rpx;
+}
+
+.rule-item-active,
+.generate-btn {
+  background: linear-gradient(135deg, #4f7ef5 0%, #6956d6 100%);
+}
+
+.batch-btn,
+.add-btn,
+.delete-btn {
+  border-radius: 12rpx;
+}
+
+/* Typography Normalize */
+.label,
+.order,
+.mode-title,
+.match-head {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.value-input,
+.picker-text,
+.player-input,
+.mode-line,
+.rounds-tip,
+.rule-item,
+.summary text,
+.score-tip,
+.rest,
+.rank-col,
+.panel-textarea,
+.panel-cancel,
+.panel-ok {
+  font-size: 26rpx;
+}
+
+.batch-btn,
+.add-btn,
+.delete-btn,
+.generate-btn {
+  font-size: 28rpx;
+  font-weight: 600;
 }

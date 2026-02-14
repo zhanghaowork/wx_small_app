@@ -1,0 +1,267 @@
+.page {
+  min-height: 100vh;
+  background: #f4f6fb;
+  padding: 22rpx 20rpx 160rpx;
+  box-sizing: border-box;
+}
+
+.section-title {
+  font-size: 32rpx;
+  color: #222;
+  font-weight: 700;
+  margin: 10rpx 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18rpx;
+  padding: 18rpx;
+  margin-bottom: 14rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.label {
+  color: #333;
+  font-size: 28rpx;
+  width: 140rpx;
+}
+
+.value-input,
+.picker-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #111;
+  text-align: right;
+}
+
+.divider {
+  height: 1rpx;
+  background: #eef0f6;
+  margin: 14rpx 0;
+}
+
+.pair-row {
+  display: flex;
+  align-items: center;
+}
+
+.player-input {
+  flex: 1;
+  height: 68rpx;
+  border-radius: 12rpx;
+  background: #f6f8ff;
+  padding: 0 16rpx;
+  font-size: 28rpx;
+}
+
+.pair-vs {
+  width: 70rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18rpx;
+}
+
+.step-btn {
+  width: 66rpx;
+  height: 66rpx;
+  line-height: 66rpx;
+  border-radius: 10rpx;
+  background: #eef1f7;
+  font-size: 42rpx;
+  color: #445;
+  padding: 0;
+}
+
+.step-value {
+  min-width: 160rpx;
+  text-align: center;
+  font-size: 32rpx;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 0;
+  border-bottom: 1rpx solid #eff1f7;
+}
+
+.score-row:last-child {
+  border-bottom: 0;
+}
+
+.col {
+  font-size: 26rpx;
+  color: #333;
+  text-align: center;
+}
+
+.col-round {
+  width: 140rpx;
+}
+
+.col-player {
+  flex: 1;
+}
+
+.score-input {
+  height: 58rpx;
+  border-radius: 10rpx;
+  background: #f7f9ff;
+}
+
+.error {
+  margin: 8rpx 0 14rpx;
+  color: #d03b2f;
+  font-size: 26rpx;
+}
+
+.summary-card text {
+  display: block;
+  font-size: 28rpx;
+  color: #2c2c2c;
+  line-height: 1.75;
+}
+
+.rank-card {
+  overflow: hidden;
+  padding: 12rpx 14rpx 6rpx;
+}
+
+.rank-header,
+.rank-row {
+  display: grid;
+  grid-template-columns: 110rpx 1fr 110rpx 110rpx 110rpx;
+  column-gap: 8rpx;
+  align-items: center;
+  border-bottom: 1rpx solid #edf0f7;
+  padding: 12rpx 10rpx;
+  border-radius: 12rpx;
+}
+
+.rank-col {
+  text-align: center;
+  font-size: 26rpx;
+}
+
+.rank-col-name {
+  text-align: left;
+}
+
+.rank-header {
+  color: #7a7f86;
+  font-weight: 700;
+}
+
+.rank-row {
+  margin-top: 10rpx;
+  border-bottom: 0;
+  background: #fff;
+}
+
+.rank-rank-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.medal {
+  font-size: 28rpx;
+}
+
+.rank-no {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #4a5568;
+}
+
+.rank-num {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.rank-top1 {
+  background: linear-gradient(90deg, #ffe0de 0%, #fff 75%);
+}
+
+.rank-top2 {
+  background: linear-gradient(90deg, #ffedc9 0%, #fff 75%);
+}
+
+.rank-top3 {
+  background: linear-gradient(90deg, #d9e8ff 0%, #fff 75%);
+}
+
+.fixed-footer {
+  position: fixed;
+  left: 20rpx;
+  right: 20rpx;
+  bottom: 20rpx;
+  z-index: 10;
+}
+
+.generate-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 700;
+  background: #ea580c;
+}
+
+.bottom-safe {
+  height: 120rpx;
+}
+
+/* UI Polish */
+.section-title {
+  color: #2f3a4a;
+}
+
+.card {
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(30, 64, 175, 0.06);
+}
+
+.player-input,
+.value-input,
+.score-input {
+  background: #f8faff;
+}
+
+.generate-btn {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+/* Typography Normalize */
+.section-title {
+  font-size: 30rpx;
+}
+
+.label,
+.player-input,
+.pair-vs,
+.step-value,
+.col,
+.summary-card text,
+.rank-col,
+.value-input,
+.picker-text {
+  font-size: 26rpx;
+}

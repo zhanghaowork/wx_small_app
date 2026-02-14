@@ -113,4 +113,40 @@
 .stat-item text {
   color: #666;
   margin-left: 20rpx;
-} 
+}
+
+/* UI Polish */
+.container {
+  background: #f4f6fb;
+}
+
+.match-item {
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(30, 64, 175, 0.06);
+}
+
+.team-input input,
+.score-input input {
+  background: #f8faff;
+  border-radius: 12rpx;
+}
+
+.end-btn {
+  background: linear-gradient(135deg, #4f7ef5 0%, #6956d6 100%);
+}
+
+/* Typography Normalize */
+.round {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.team-input input,
+.score-input text,
+.score-input input,
+.stat-item,
+.add-btn,
+.end-btn {
+  font-size: 26rpx;
+}

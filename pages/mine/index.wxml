@@ -1,0 +1,34 @@
+<view class="page">
+  <view class="top-bar card">
+    <text class="title">羽毛球助手</text>
+  </view>
+
+  <view class="hero-card">
+    <text class="hero-icon">👤</text>
+    <text class="hero-title">我的比赛记录</text>
+    <text class="hero-sub">自动保存每次结算结果，随时查看战绩</text>
+  </view>
+
+  <view class="header card">
+    <text class="header-title">历史记录</text>
+    <button class="clear-btn" bindtap="clearRecords" wx:if="{{records.length}}">清空</button>
+  </view>
+
+  <view class="empty card" wx:if="{{!records.length}}">
+    <text class="empty-text">暂无比赛记录，去左侧“模式创建”发起一场吧</text>
+  </view>
+
+  <view class="record-card" wx:for="{{records}}" wx:key="id">
+    <view class="record-top">
+      <view class="mode-wrap">
+        <text class="mode-icon">🏸</text>
+        <text class="mode">{{item.mode}}</text>
+      </view>
+      <text class="time">{{item.createdAt}}</text>
+    </view>
+    <text class="line" wx:if="{{item.title}}">标题：{{item.title}}</text>
+    <text class="line" wx:if="{{item.matchDate}}">日期：{{item.matchDate}}</text>
+    <text class="line">已录入场次：{{item.totalMatches}}</text>
+    <text class="line">冠军：{{item.champion || '暂无'}}</text>
+  </view>
+</view>

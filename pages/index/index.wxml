@@ -1,16 +1,46 @@
 <view class="page">
-  <view class="top-bar">
-    <text class="title">羽毛球助手</text>
+  <view class="notice-bar" wx:if="{{showNotice}}">
+    <text class="notice-icon">🏸</text>
+    <text class="notice-text">今天想打什么模式？选一个直接开赛</text>
+    <text class="notice-close" bindtap="dismissNotice">×</text>
+  </view>
+
+  <view id="modeSection" class="mode-section-title">模式创建</view>
+  <view class="module-switch">
+    <view
+      class="module-item {{activeModule === 'double' ? 'module-item-active' : ''}}"
+      data-module="double"
+      bindtap="switchModule"
+    >双打</view>
+    <view
+      class="module-item {{activeModule === 'single' ? 'module-item-active' : ''}}"
+      data-module="single"
+      bindtap="switchModule"
+    >单打</view>
+  </view>
+
+  <view class="empty-card" wx:if="{{modeCards.length === 0}}">
+    <text class="empty-text">当前模块暂无可用模式</text>
   </view>
 
   <view class="mode-card" wx:for="{{modeCards}}" wx:key="id">
     <view class="mode-left">
+      <view class="mode-icon-wrap"><text class="mode-icon">{{item.icon}}</text></view>
+      <view class="mode-texts">
       <text class="mode-title">{{item.title}}</text>
       <text class="mode-line">{{item.desc1}}</text>
       <text class="mode-line">{{item.desc2}}</text>
+      </view>
     </view>
     <view class="mode-right">
-      <button class="start-btn {{item.buttonClass}}" data-url="{{item.url}}" bindtap="startMode">发起</button>
+      <button
+        class="start-btn {{item.buttonClass}}"
+        data-url="{{item.url}}"
+        data-disabled="{{item.disabled}}"
+        bindtap="startMode"
+      >{{item.disabled ? '待开' : '开始'}}</button>
     </view>
   </view>
+
+  <button class="create-btn" bindtap="scrollToModes">快速创建比赛</button>
 </view>

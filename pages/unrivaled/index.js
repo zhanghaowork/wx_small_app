@@ -11,6 +11,7 @@ function pairAt(order, startIndex) {
   const b = order[(startIndex + 1) % n];
   return [a, b];
 }
+const HISTORY_KEY = 'match_history_records';
 
 Page({
   data: {
@@ -32,6 +33,7 @@ Page({
     ranking: [],
     teamScoreSummary: { teamA: 0, teamB: 0 },
     totalScoredMatches: 0,
+    isEnding: false,
     errorText: ''
   },
 
@@ -166,6 +168,34 @@ Page({
     });
   },
 
+  formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    const hh = `${date.getHours()}`.padStart(2, '0');
+    const mm = `${date.getMinutes()}`.padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}`;
+  },
+
+  saveMatchRecord(payload) {
+    const list = wx.getStorageSync(HISTORY_KEY) || [];
+    const now = new Date();
+    const nowTs = now.getTime();
+    const fingerprint = JSON.stringify(payload);
+    const latest = list[0];
+    if (latest && latest.fingerprint === fingerprint && nowTs - (latest.createdTs || 0) < 8000) {
+      return;
+    }
+    const next = [{
+      id: `${nowTs}_${Math.floor(Math.random() * 100000)}`,
+      createdAt: this.formatDateTime(now),
+      createdTs: nowTs,
+      fingerprint,
+      ...payload
+    }, ...list].slice(0, 200);
+    wx.setStorageSync(HISTORY_KEY, next);
+  },
+
   handlePrint() {
     wx.showToast({ title: '打印功能待接入', icon: 'none' });
   },
@@ -179,10 +209,12 @@ Page({
       this.generate();
       return;
     }
+    if (this.data.isEnding) return;
     this.endCompetition();
   },
 
   endCompetition() {
+    if (this.data.isEnding) return;
     if (!this.data.scoreMatches.length) {
       this.showError('请先生成接力表');
       return;
@@ -194,52 +226,65 @@ Page({
       return;
     }
 
-    const stats = {};
-    [...this.data.teamAOrder, ...this.data.teamBOrder].forEach((name) => {
-      stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
-    });
-
-    let teamA = 0;
-    let teamB = 0;
-
-    validMatches.forEach((m) => {
-      const s1 = Number(m.score1);
-      const s2 = Number(m.score2);
-      teamA += s1;
-      teamB += s2;
-      const team1Win = s1 > s2;
-      const team2Win = s2 > s1;
-
-      m.team1.forEach((p) => {
-        if (!stats[p]) return;
-        stats[p].matches += 1;
-        stats[p].pointsFor += s1;
-        stats[p].pointsAgainst += s2;
-        if (team1Win) stats[p].wins += 1;
-        if (team2Win) stats[p].losses += 1;
+    this.setData({ isEnding: true });
+    try {
+      const stats = {};
+      [...this.data.teamAOrder, ...this.data.teamBOrder].forEach((name) => {
+        stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
       });
-      m.team2.forEach((p) => {
-        if (!stats[p]) return;
-        stats[p].matches += 1;
-        stats[p].pointsFor += s2;
-        stats[p].pointsAgainst += s1;
-        if (team2Win) stats[p].wins += 1;
-        if (team1Win) stats[p].losses += 1;
+
+      let teamA = 0;
+      let teamB = 0;
+
+      validMatches.forEach((m) => {
+        const s1 = Number(m.score1);
+        const s2 = Number(m.score2);
+        teamA += s1;
+        teamB += s2;
+        const team1Win = s1 > s2;
+        const team2Win = s2 > s1;
+
+        m.team1.forEach((p) => {
+          if (!stats[p]) return;
+          stats[p].matches += 1;
+          stats[p].pointsFor += s1;
+          stats[p].pointsAgainst += s2;
+          if (team1Win) stats[p].wins += 1;
+          if (team2Win) stats[p].losses += 1;
+        });
+        m.team2.forEach((p) => {
+          if (!stats[p]) return;
+          stats[p].matches += 1;
+          stats[p].pointsFor += s2;
+          stats[p].pointsAgainst += s1;
+          if (team2Win) stats[p].wins += 1;
+          if (team1Win) stats[p].losses += 1;
+        });
       });
-    });
 
-    const ranking = Object.values(stats)
-      .map((s) => ({ ...s, diff: s.pointsFor - s.pointsAgainst, winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0 }))
-      .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
+      const ranking = Object.values(stats)
+        .map((s) => ({ ...s, diff: s.pointsFor - s.pointsAgainst, winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0 }))
+        .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
 
-    this.setData({
-      ranking,
-      teamScoreSummary: { teamA, teamB },
-      totalScoredMatches: validMatches.length,
-      resultReady: true,
-      errorText: ''
-    });
+      this.setData({
+        ranking,
+        teamScoreSummary: { teamA, teamB },
+        totalScoredMatches: validMatches.length,
+        resultReady: true,
+        errorText: ''
+      });
 
-    wx.showToast({ title: '结算完成', icon: 'success' });
+      this.saveMatchRecord({
+        mode: '无与伦比',
+        title: '',
+        matchDate: '',
+        totalMatches: validMatches.length,
+        champion: teamA > teamB ? 'A队' : (teamB > teamA ? 'B队' : '平局')
+      });
+
+      wx.showToast({ title: '结算完成', icon: 'success' });
+    } finally {
+      this.setData({ isEnding: false });
+    }
   }
 });

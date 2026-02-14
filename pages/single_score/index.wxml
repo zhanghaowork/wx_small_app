@@ -1,0 +1,85 @@
+<view class="page">
+  <view class="section-title">比赛信息</view>
+  <view class="card form-card">
+    <view class="row">
+      <text class="label">标题</text>
+      <input class="value-input" placeholder="输入比赛标题（可选）" value="{{title}}" bindinput="onTitleInput" />
+    </view>
+    <view class="divider"></view>
+    <view class="row">
+      <text class="label">比赛日期</text>
+      <picker mode="date" value="{{matchDate}}" bindchange="onDateChange">
+        <view class="picker-text">{{matchDate || '选择比赛日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="section-title">比赛人员</view>
+  <view class="card player-card">
+    <view class="pair-row">
+      <input class="player-input" placeholder="选手A" data-field="playerA" value="{{playerA}}" bindinput="onPlayerInput" />
+      <text class="pair-vs">VS</text>
+      <input class="player-input" placeholder="选手B" data-field="playerB" value="{{playerB}}" bindinput="onPlayerInput" />
+    </view>
+  </view>
+
+  <view class="section-title">比赛局数</view>
+  <view class="card round-card">
+    <view class="stepper">
+      <button class="step-btn" bindtap="decreaseRounds">-</button>
+      <text class="step-value">{{roundsCount}} 局</text>
+      <button class="step-btn" bindtap="increaseRounds">+</button>
+    </view>
+  </view>
+
+  <view class="section-title">比分记录</view>
+  <view class="card score-card">
+    <view class="score-row head">
+      <text class="col col-round">局次</text>
+      <text class="col col-player">{{playerA || '选手A'}}</text>
+      <text class="col col-player">{{playerB || '选手B'}}</text>
+    </view>
+    <view class="score-row" wx:for="{{matches}}" wx:key="round">
+      <text class="col col-round">第{{item.round}}局</text>
+      <input class="col col-player score-input" type="number" data-index="{{index}}" data-field="scoreA" value="{{item.scoreA}}" bindinput="onScoreInput" />
+      <input class="col col-player score-input" type="number" data-index="{{index}}" data-field="scoreB" value="{{item.scoreB}}" bindinput="onScoreInput" />
+    </view>
+  </view>
+
+  <view class="error" wx:if="{{errorText}}">{{errorText}}</view>
+
+  <view class="settlement" wx:if="{{resultReady}}">
+    <view class="section-title">结算结果</view>
+    <view class="card summary-card">
+      <text>{{playerA}}：胜{{settlement.winsA}}局，总分{{settlement.pointsA}}</text>
+      <text>{{playerB}}：胜{{settlement.winsB}}局，总分{{settlement.pointsB}}</text>
+      <text>已录入局数：{{settlement.totalMatches}}</text>
+    </view>
+    <view class="card rank-card">
+      <view class="rank-header">
+        <text class="rank-col rank-col-rank">排名</text>
+        <text class="rank-col rank-col-name">选手</text>
+        <text class="rank-col">胜场</text>
+        <text class="rank-col">净胜</text>
+        <text class="rank-col">胜率</text>
+      </view>
+      <view class="rank-row {{index === 0 ? 'rank-top1' : (index === 1 ? 'rank-top2' : (index === 2 ? 'rank-top3' : ''))}}" wx:for="{{ranking}}" wx:key="name">
+        <view class="rank-col rank-col-rank rank-rank-wrap">
+          <text class="medal" wx:if="{{index === 0}}">🥇</text>
+          <text class="medal" wx:if="{{index === 1}}">🥈</text>
+          <text class="medal" wx:if="{{index === 2}}">🥉</text>
+          <text class="rank-no">{{index + 1}}</text>
+        </view>
+        <text class="rank-col rank-col-name">{{item.name}}</text>
+        <text class="rank-col rank-num">{{item.wins}}</text>
+        <text class="rank-col rank-num">{{item.diff}}</text>
+        <text class="rank-col rank-num">{{item.winRate}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-safe"></view>
+  <view class="fixed-footer">
+    <button class="generate-btn" bindtap="onPrimaryAction">结算比赛</button>
+  </view>
+</view>

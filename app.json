@@ -1,11 +1,31 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/mine/index",
+    "pages/ladder/index",
+    "pages/single_score/index",
+    "pages/single_ladder/index",
     "pages/random/index",
     "pages/over8/index",
     "pages/unrivaled/index",
     "pages/match/index"
   ],
+  "tabBar": {
+    "position": "top",
+    "color": "#6a6a6a",
+    "selectedColor": "#5f7ef6",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "模式创建"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",

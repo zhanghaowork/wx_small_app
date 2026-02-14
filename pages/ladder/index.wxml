@@ -1,0 +1,113 @@
+<view class="page">
+  <view class="section-title">擂台信息</view>
+  <view class="card form-card">
+    <view class="row">
+      <text class="label">标题</text>
+      <input class="value-input" placeholder="输入擂台赛标题（可选）" value="{{title}}" bindinput="onTitleInput" />
+    </view>
+    <view class="divider"></view>
+    <view class="row">
+      <text class="label">比赛日期</text>
+      <picker mode="date" value="{{matchDate}}" bindchange="onDateChange">
+        <view class="picker-text">{{matchDate || '选择比赛日期'}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="section-title">擂主组合（固定）</view>
+  <view class="card player-card">
+    <view class="pair-row">
+      <input class="player-input" placeholder="擂主A" data-field="p1" value="{{defender.p1}}" bindinput="onDefenderInput" />
+      <text class="pair-vs">+</text>
+      <input class="player-input" placeholder="擂主B" data-field="p2" value="{{defender.p2}}" bindinput="onDefenderInput" />
+    </view>
+  </view>
+
+  <view class="section-title">攻擂组合（最多10组）</view>
+  <view class="card challenger-card">
+    <view class="challenger-actions">
+      <button class="batch-btn" bindtap="showBatchInput">批量导入</button>
+      <button class="add-btn" bindtap="addChallenger">新增攻擂组</button>
+    </view>
+    <view class="pair-row challenger-row" wx:for="{{challengers}}" wx:key="id">
+      <input class="player-input" placeholder="攻擂A" data-index="{{index}}" data-field="p1" value="{{item.p1}}" bindinput="onChallengerInput" />
+      <text class="pair-vs">+</text>
+      <input class="player-input" placeholder="攻擂B" data-index="{{index}}" data-field="p2" value="{{item.p2}}" bindinput="onChallengerInput" />
+      <button class="delete-btn" size="mini" data-index="{{index}}" bindtap="removeChallenger">删除</button>
+    </view>
+  </view>
+
+  <view class="batch-panel" wx:if="{{batchInputVisible}}">
+    <view class="panel-mask" bindtap="hideBatchInput"></view>
+    <view class="panel-body">
+      <view class="panel-title">批量导入擂台名单</view>
+      <textarea
+        class="panel-textarea"
+        placeholder="{{batchPlaceholder}}"
+        value="{{batchText}}"
+        bindinput="onBatchTextInput"
+      ></textarea>
+      <view class="panel-actions">
+        <button class="panel-cancel" bindtap="hideBatchInput">取消</button>
+        <button class="panel-ok" bindtap="applyBatchInput">确认导入</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-title">比分记录</view>
+  <view class="card score-card">
+    <view class="score-row head">
+      <text class="col col-match">对阵</text>
+      <text class="col col-score">擂主</text>
+      <text class="col col-score">攻擂</text>
+    </view>
+
+    <view class="score-row" wx:for="{{challengers}}" wx:key="id">
+      <view class="col col-match match-text">
+        <text>{{defender.p1 || '擂主A'}}/{{defender.p2 || '擂主B'}}</text>
+        <text class="vs">VS</text>
+        <text>{{item.p1 || '攻擂A'}}/{{item.p2 || '攻擂B'}}</text>
+      </view>
+      <input class="col col-score score-input" type="number" data-index="{{index}}" data-field="scoreDef" value="{{item.scoreDef}}" bindinput="onScoreInput" />
+      <input class="col col-score score-input" type="number" data-index="{{index}}" data-field="scoreCha" value="{{item.scoreCha}}" bindinput="onScoreInput" />
+    </view>
+  </view>
+
+  <view class="error" wx:if="{{errorText}}">{{errorText}}</view>
+
+  <view class="settlement" wx:if="{{resultReady}}">
+    <view class="section-title">结算结果</view>
+    <view class="card summary-card">
+      <text>已录入场次：{{settlement.totalMatches}}</text>
+      <text>擂主胜场：{{settlement.defenderWins}}</text>
+      <text>擂主负场：{{settlement.defenderLosses}}</text>
+    </view>
+
+    <view class="card rank-card">
+      <view class="rank-header">
+        <text class="rank-col rank-col-rank">排名</text>
+        <text class="rank-col rank-col-name">组合</text>
+        <text class="rank-col">胜场</text>
+        <text class="rank-col">净胜</text>
+        <text class="rank-col">胜率</text>
+      </view>
+      <view class="rank-row {{index === 0 ? 'rank-top1' : (index === 1 ? 'rank-top2' : (index === 2 ? 'rank-top3' : ''))}}" wx:for="{{ranking}}" wx:key="name">
+        <view class="rank-col rank-col-rank rank-rank-wrap">
+          <text class="medal" wx:if="{{index === 0}}">🥇</text>
+          <text class="medal" wx:if="{{index === 1}}">🥈</text>
+          <text class="medal" wx:if="{{index === 2}}">🥉</text>
+          <text class="rank-no">{{index + 1}}</text>
+        </view>
+        <text class="rank-col rank-col-name">{{item.name}}</text>
+        <text class="rank-col rank-num">{{item.wins}}</text>
+        <text class="rank-col rank-num">{{item.diff}}</text>
+        <text class="rank-col rank-num">{{item.winRate}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-safe"></view>
+  <view class="fixed-footer">
+    <button class="generate-btn" bindtap="onPrimaryAction">结算擂台</button>
+  </view>
+</view>

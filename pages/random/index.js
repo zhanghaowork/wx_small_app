@@ -1,6 +1,10 @@
 const SCHEDULE_RULES = {
   4: [{ perPlayer: 3, rounds: 3 }],
-  5: [{ perPlayer: 4, rounds: 5 }],
+  5: [
+    { perPlayer: 4, rounds: 5 },
+    { perPlayer: 8, rounds: 10 },
+    { perPlayer: 12, rounds: 15 }
+  ],
   6: [
     { perPlayer: 4, rounds: 6 },
     { perPlayer: 6, rounds: 9 },
@@ -17,6 +21,7 @@ const TEAM_REPEAT_WEIGHT = 9;
 const OPP_REPEAT_WEIGHT = 3;
 const REST_STREAK_WEIGHT = 3;
 const QUOTA_DISTANCE_WEIGHT = 3;
+const HISTORY_KEY = 'match_history_records';
 
 function pairKey(a, b) {
   return [a, b].sort().join('|');
@@ -46,6 +51,7 @@ Page({
     resultReady: false,
     ranking: [],
     totalScoredMatches: 0,
+    isEnding: false,
     errorText: ''
   },
 
@@ -399,6 +405,34 @@ Page({
     }, 0);
   },
 
+  formatDateTime(date) {
+    const y = date.getFullYear();
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    const hh = `${date.getHours()}`.padStart(2, '0');
+    const mm = `${date.getMinutes()}`.padStart(2, '0');
+    return `${y}-${m}-${d} ${hh}:${mm}`;
+  },
+
+  saveMatchRecord(payload) {
+    const list = wx.getStorageSync(HISTORY_KEY) || [];
+    const now = new Date();
+    const nowTs = now.getTime();
+    const fingerprint = JSON.stringify(payload);
+    const latest = list[0];
+    if (latest && latest.fingerprint === fingerprint && nowTs - (latest.createdTs || 0) < 8000) {
+      return;
+    }
+    const next = [{
+      id: `${nowTs}_${Math.floor(Math.random() * 100000)}`,
+      createdAt: this.formatDateTime(now),
+      createdTs: nowTs,
+      fingerprint,
+      ...payload
+    }, ...list].slice(0, 200);
+    wx.setStorageSync(HISTORY_KEY, next);
+  },
+
   onScoreInput(e) {
     const index = Number(e.currentTarget.dataset.index);
     const team = Number(e.currentTarget.dataset.team);
@@ -423,10 +457,12 @@ Page({
       this.generateCompetition();
       return;
     }
+    if (this.data.isEnding) return;
     this.endCompetition();
   },
 
   endCompetition() {
+    if (this.data.isEnding) return;
     if (!this.data.schedule.length) {
       this.showError('请先生成赛程');
       return;
@@ -438,54 +474,67 @@ Page({
       return;
     }
 
-    const stats = {};
-    const names = this.data.players.map((p) => p.name.trim()).filter(Boolean);
-    names.forEach((name) => {
-      stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
-    });
-
-    validMatches.forEach((m) => {
-      const s1 = Number(m.score1);
-      const s2 = Number(m.score2);
-      const team1 = m.team1;
-      const team2 = m.team2;
-      const team1Win = s1 > s2;
-      const team2Win = s2 > s1;
-
-      team1.forEach((p) => {
-        if (!stats[p]) return;
-        stats[p].matches += 1;
-        stats[p].pointsFor += s1;
-        stats[p].pointsAgainst += s2;
-        if (team1Win) stats[p].wins += 1;
-        if (team2Win) stats[p].losses += 1;
+    this.setData({ isEnding: true });
+    try {
+      const stats = {};
+      const names = this.data.players.map((p) => p.name.trim()).filter(Boolean);
+      names.forEach((name) => {
+        stats[name] = { name, wins: 0, losses: 0, matches: 0, pointsFor: 0, pointsAgainst: 0 };
       });
 
-      team2.forEach((p) => {
-        if (!stats[p]) return;
-        stats[p].matches += 1;
-        stats[p].pointsFor += s2;
-        stats[p].pointsAgainst += s1;
-        if (team2Win) stats[p].wins += 1;
-        if (team1Win) stats[p].losses += 1;
+      validMatches.forEach((m) => {
+        const s1 = Number(m.score1);
+        const s2 = Number(m.score2);
+        const team1 = m.team1;
+        const team2 = m.team2;
+        const team1Win = s1 > s2;
+        const team2Win = s2 > s1;
+
+        team1.forEach((p) => {
+          if (!stats[p]) return;
+          stats[p].matches += 1;
+          stats[p].pointsFor += s1;
+          stats[p].pointsAgainst += s2;
+          if (team1Win) stats[p].wins += 1;
+          if (team2Win) stats[p].losses += 1;
+        });
+
+        team2.forEach((p) => {
+          if (!stats[p]) return;
+          stats[p].matches += 1;
+          stats[p].pointsFor += s2;
+          stats[p].pointsAgainst += s1;
+          if (team2Win) stats[p].wins += 1;
+          if (team1Win) stats[p].losses += 1;
+        });
       });
-    });
 
-    const ranking = Object.values(stats)
-      .map((s) => ({
-        ...s,
-        diff: s.pointsFor - s.pointsAgainst,
-        winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0
-      }))
-      .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
+      const ranking = Object.values(stats)
+        .map((s) => ({
+          ...s,
+          diff: s.pointsFor - s.pointsAgainst,
+          winRate: s.matches ? Math.round((s.wins / s.matches) * 100) : 0
+        }))
+        .sort((a, b) => b.wins - a.wins || b.diff - a.diff || b.pointsFor - a.pointsFor);
 
-    this.setData({
-      ranking,
-      totalScoredMatches: validMatches.length,
-      resultReady: true,
-      errorText: ''
-    });
+      this.setData({
+        ranking,
+        totalScoredMatches: validMatches.length,
+        resultReady: true,
+        errorText: ''
+      });
 
-    wx.showToast({ title: '结算完成', icon: 'success' });
+      this.saveMatchRecord({
+        mode: '4-8人转',
+        title: this.data.title || '',
+        matchDate: this.data.matchDate || '',
+        totalMatches: validMatches.length,
+        champion: ranking[0] ? ranking[0].name : ''
+      });
+
+      wx.showToast({ title: '结算完成', icon: 'success' });
+    } finally {
+      this.setData({ isEnding: false });
+    }
   }
 });
