@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "固搭擂台赛"
+  "navigationBarTitleText": "固搭擂台赛",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "无与伦比"
+  "navigationBarTitleText": "无与伦比",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

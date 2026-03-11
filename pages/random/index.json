@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "创建比赛"
+  "navigationBarTitleText": "创建比赛",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

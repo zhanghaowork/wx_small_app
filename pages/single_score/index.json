@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "单打积分赛"
+  "navigationBarTitleText": "单打积分赛",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

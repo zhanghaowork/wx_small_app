@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "单打攻擂赛"
+  "navigationBarTitleText": "单打攻擂赛",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }

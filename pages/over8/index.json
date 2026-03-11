@@ -1,3 +1,5 @@
 {
-  "navigationBarTitleText": "超8转"
+  "navigationBarTitleText": "超8转",
+  "enableShareAppMessage": true,
+  "enableShareTimeline": true
 }
